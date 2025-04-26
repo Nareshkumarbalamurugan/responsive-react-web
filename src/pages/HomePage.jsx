@@ -20,8 +20,8 @@ const HomePage = () => {
           </div>
           <div className="md:w-1/2">
             <img 
-              src="/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png" 
-              alt="Grocery bag with fresh vegetables, fruits and goods" 
+              src="https://images.unsplash.com/photo-1543168256-418811576931?w=800&auto=format&fit=crop"
+              alt="Fresh groceries and vegetables" 
               className="w-full h-auto rounded-lg shadow-lg"
             />
           </div>
@@ -36,7 +36,11 @@ const HomePage = () => {
             {/* Category 1 */}
             <Link to="/categories/fruits-vegetables" className="category-card">
               <div className="p-4 rounded-full bg-yellow-100">
-                <img src="/public/lovable-uploads/291d7186-55e3-4105-ad5b-ebd9ea96fca8.png" alt="Fruits and Vegetables" className="category-icon" />
+                <img 
+                  src="https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=800&auto=format&fit=crop" 
+                  alt="Fruits and Vegetables" 
+                  className="category-icon"
+                />
               </div>
               <h3 className="text-xl font-medium mt-4">Fruits & Vegetables</h3>
             </Link>
@@ -44,7 +48,11 @@ const HomePage = () => {
             {/* Category 2 */}
             <Link to="/categories/beverages" className="category-card">
               <div className="p-4 rounded-full bg-blue-100">
-                <img src="/public/lovable-uploads/291d7186-55e3-4105-ad5b-ebd9ea96fca8.png" alt="Beverages" className="category-icon" />
+                <img 
+                  src="https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=800&auto=format&fit=crop" 
+                  alt="Beverages" 
+                  className="category-icon"
+                />
               </div>
               <h3 className="text-xl font-medium mt-4">Beverages</h3>
             </Link>
@@ -52,7 +60,11 @@ const HomePage = () => {
             {/* Category 3 */}
             <Link to="/categories/dairy" className="category-card">
               <div className="p-4 rounded-full bg-green-100">
-                <img src="/public/lovable-uploads/291d7186-55e3-4105-ad5b-ebd9ea96fca8.png" alt="Dairy Products" className="category-icon" />
+                <img 
+                  src="https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=800&auto=format&fit=crop" 
+                  alt="Dairy Products" 
+                  className="category-icon"
+                />
               </div>
               <h3 className="text-xl font-medium mt-4">Dairy Products</h3>
             </Link>
@@ -60,7 +72,11 @@ const HomePage = () => {
             {/* Category 4 */}
             <Link to="/categories/bakery" className="category-card">
               <div className="p-4 rounded-full bg-red-100">
-                <img src="/public/lovable-uploads/291d7186-55e3-4105-ad5b-ebd9ea96fca8.png" alt="Bakery & Snacks" className="category-icon" />
+                <img 
+                  src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&auto=format&fit=crop" 
+                  alt="Bakery & Snacks" 
+                  className="category-icon"
+                />
               </div>
               <h3 className="text-xl font-medium mt-4">Bakery & Snacks</h3>
             </Link>
@@ -73,17 +89,42 @@ const HomePage = () => {
         <div className="container mx-auto px-6">
           <h2 className="text-3xl font-bold mb-10 text-center">Featured Products</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[1, 2, 3, 4].map((item) => (
-              <div key={item} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            {[
+              {
+                id: 1,
+                name: "Organic Bananas",
+                price: 3.99,
+                image: "https://images.unsplash.com/photo-1603833665858-e61d17a86224?w=800&auto=format&fit=crop"
+              },
+              {
+                id: 2,
+                name: "Fresh Milk",
+                price: 4.99,
+                image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=800&auto=format&fit=crop"
+              },
+              {
+                id: 3,
+                name: "Whole Grain Bread",
+                price: 5.99,
+                image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&auto=format&fit=crop"
+              },
+              {
+                id: 4,
+                name: "Fresh Orange Juice",
+                price: 6.99,
+                image: "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=800&auto=format&fit=crop"
+              }
+            ].map((product) => (
+              <div key={product.id} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                 <img 
-                  src="/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png" 
-                  alt="Product image" 
+                  src={product.image}
+                  alt={product.name}
                   className="w-full h-52 object-cover"
                 />
                 <div className="p-4">
-                  <h3 className="font-medium text-lg mb-2">Organic Product {item}</h3>
+                  <h3 className="font-medium text-lg mb-2">{product.name}</h3>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-lg font-bold">${(3 + item).toFixed(2)}</span>
+                    <span className="text-lg font-bold">${product.price.toFixed(2)}</span>
                     <span className="text-sm text-green-600 bg-green-50 px-2 py-1 rounded-full">In Stock</span>
                   </div>
                   <p className="text-gray-500 text-sm mb-4">Fresh and organic, sourced directly from farms.</p>

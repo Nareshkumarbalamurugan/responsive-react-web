@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -6,49 +5,49 @@ const categories = [
   {
     id: 1,
     name: 'Fruits & Vegetables',
-    image: '/public/lovable-uploads/291d7186-55e3-4105-ad5b-ebd9ea96fca8.png',
+    image: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=800&auto=format&fit=crop',
     slug: 'fruits-vegetables'
   },
   {
     id: 2,
     name: 'Beverages',
-    image: '/public/lovable-uploads/291d7186-55e3-4105-ad5b-ebd9ea96fca8.png',
+    image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=800&auto=format&fit=crop',
     slug: 'beverages'
   },
   {
     id: 3,
     name: 'Dairy Products',
-    image: '/public/lovable-uploads/291d7186-55e3-4105-ad5b-ebd9ea96fca8.png',
+    image: 'https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=800&auto=format&fit=crop',
     slug: 'dairy'
   },
   {
     id: 4,
     name: 'Bakery & Snacks',
-    image: '/public/lovable-uploads/291d7186-55e3-4105-ad5b-ebd9ea96fca8.png',
+    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&auto=format&fit=crop',
     slug: 'bakery'
   },
   {
     id: 5,
     name: 'Meat & Seafood',
-    image: '/public/lovable-uploads/291d7186-55e3-4105-ad5b-ebd9ea96fca8.png',
+    image: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=800&auto=format&fit=crop',
     slug: 'meat-seafood'
   },
   {
     id: 6,
     name: 'Frozen Foods',
-    image: '/public/lovable-uploads/291d7186-55e3-4105-ad5b-ebd9ea96fca8.png',
+    image: 'https://images.unsplash.com/photo-1624274579623-568736cf2e32?w=800&auto=format&fit=crop',
     slug: 'frozen'
   },
   {
     id: 7,
     name: 'Pantry & Staples',
-    image: '/public/lovable-uploads/291d7186-55e3-4105-ad5b-ebd9ea96fca8.png',
+    image: 'https://images.unsplash.com/photo-1579113800032-c38bd7635818?w=800&auto=format&fit=crop',
     slug: 'pantry'
   },
   {
     id: 8,
     name: 'Personal Care',
-    image: '/public/lovable-uploads/291d7186-55e3-4105-ad5b-ebd9ea96fca8.png',
+    image: 'https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=800&auto=format&fit=crop',
     slug: 'personal-care'
   }
 ];

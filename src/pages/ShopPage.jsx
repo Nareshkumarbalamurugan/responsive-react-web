@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { toast } from 'sonner';
@@ -9,7 +8,7 @@ const products = [
     id: 1,
     name: 'Organic Bananas',
     price: 2.99,
-    image: '/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png',
+    image: 'https://images.unsplash.com/photo-1603833665858-e61d17a86224?w=800&auto=format&fit=crop',
     category: 'fruits-vegetables',
     seller: {
       id: 101,
@@ -21,7 +20,7 @@ const products = [
     id: 2,
     name: 'Fresh Tomatoes',
     price: 3.49,
-    image: '/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png',
+    image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800&auto=format&fit=crop',
     category: 'fruits-vegetables',
     seller: {
       id: 102,
@@ -33,7 +32,7 @@ const products = [
     id: 3,
     name: 'Whole Milk',
     price: 2.79,
-    image: '/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png',
+    image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=800&auto=format&fit=crop',
     category: 'dairy',
     seller: {
       id: 103,
@@ -45,7 +44,7 @@ const products = [
     id: 4,
     name: 'Brown Eggs (12 pack)',
     price: 4.99,
-    image: '/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png',
+    image: 'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=800&auto=format&fit=crop',
     category: 'dairy',
     seller: {
       id: 103,
@@ -57,7 +56,7 @@ const products = [
     id: 5,
     name: 'Sourdough Bread',
     price: 3.99,
-    image: '/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png',
+    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&auto=format&fit=crop',
     category: 'bakery',
     seller: {
       id: 104,
@@ -69,7 +68,7 @@ const products = [
     id: 6,
     name: 'Orange Juice',
     price: 3.29,
-    image: '/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png',
+    image: 'https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=800&auto=format&fit=crop',
     category: 'beverages',
     seller: {
       id: 105,
@@ -81,7 +80,7 @@ const products = [
     id: 7,
     name: 'Avocados (3 pack)',
     price: 5.99,
-    image: '/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png',
+    image: 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=800&auto=format&fit=crop',
     category: 'fruits-vegetables',
     seller: {
       id: 101,
@@ -93,7 +92,7 @@ const products = [
     id: 8,
     name: 'Chocolate Chip Cookies',
     price: 4.49,
-    image: '/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png',
+    image: 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=800&auto=format&fit=crop',
     category: 'bakery',
     seller: {
       id: 104,

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
@@ -10,7 +9,7 @@ const sellers = [
     id: 101,
     name: 'Fresh Farms',
     description: 'We are a family-owned farm specializing in organic vegetables and fruits. All our products are grown using sustainable farming practices without any harmful pesticides or chemicals.',
-    logo: '/public/lovable-uploads/215b2ed0-efad-44e1-930a-e5ec51473d15.png',
+    logo: 'https://images.unsplash.com/photo-1533900298318-6b8da08a523e?w=800&auto=format&fit=crop',
     rating: 4.8,
     reviewCount: 245,
     since: 'March 2020',
@@ -22,25 +21,25 @@ const sellers = [
         id: 1,
         name: 'Organic Bananas',
         price: 2.99,
-        image: '/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png',
+        image: 'https://images.unsplash.com/photo-1603833665858-e61d17a86224?w=800&auto=format&fit=crop',
       },
       {
         id: 7,
         name: 'Avocados (3 pack)',
         price: 5.99,
-        image: '/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png',
+        image: 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=800&auto=format&fit=crop',
       },
       {
         id: 11,
         name: 'Organic Apples',
         price: 3.49,
-        image: '/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png',
+        image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800&auto=format&fit=crop',
       },
       {
         id: 12,
         name: 'Fresh Salad Mix',
         price: 4.29,
-        image: '/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png',
+        image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=800&auto=format&fit=crop',
       }
     ]
   },
@@ -48,7 +47,7 @@ const sellers = [
     id: 102,
     name: 'Organic Growers',
     description: 'Certified organic farm with a wide variety of seasonal vegetables and fruits. We focus on biodiversity and soil health to grow nutrient-rich produce.',
-    logo: '/public/lovable-uploads/215b2ed0-efad-44e1-930a-e5ec51473d15.png',
+    logo: 'https://images.unsplash.com/photo-1560493676-04071c5f467b?w=800&auto=format&fit=crop',
     rating: 4.5,
     reviewCount: 189,
     since: 'June 2019',
@@ -60,19 +59,19 @@ const sellers = [
         id: 2,
         name: 'Fresh Tomatoes',
         price: 3.49,
-        image: '/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png',
+        image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800&auto=format&fit=crop',
       },
       {
         id: 13,
         name: 'Organic Carrots',
         price: 2.49,
-        image: '/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png',
+        image: 'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=800&auto=format&fit=crop',
       },
       {
         id: 14,
         name: 'Organic Bell Peppers',
         price: 3.99,
-        image: '/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png',
+        image: 'https://images.unsplash.com/photo-1563246907-87f96fda5645?w=800&auto=format&fit=crop',
       }
     ]
   },
@@ -80,7 +79,7 @@ const sellers = [
     id: 103,
     name: 'Dairy Delights',
     description: 'Family-owned dairy farm producing high-quality milk, cheese, yogurt, and eggs. Our animals are pasture-raised and treated humanely.',
-    logo: '/public/lovable-uploads/215b2ed0-efad-44e1-930a-e5ec51473d15.png',
+    logo: 'https://images.unsplash.com/photo-1573805997632-eecc4fef5af6?w=800&auto=format&fit=crop',
     rating: 4.7,
     reviewCount: 210,
     since: 'January 2021',
@@ -92,19 +91,19 @@ const sellers = [
         id: 3,
         name: 'Whole Milk',
         price: 2.79,
-        image: '/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png',
+        image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=800&auto=format&fit=crop',
       },
       {
         id: 4,
         name: 'Brown Eggs (12 pack)',
         price: 4.99,
-        image: '/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png',
+        image: 'https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=800&auto=format&fit=crop',
       },
       {
         id: 15,
         name: 'Greek Yogurt',
         price: 3.29,
-        image: '/public/lovable-uploads/fecf0a8b-d980-4df5-a320-a9e87cff5c61.png',
+        image: 'https://images.unsplash.com/photo-1570696516188-ade861b84a49?w=800&auto=format&fit=crop',
       }
     ]
   }
