@@ -12,6 +12,12 @@ export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userType, setUserType] = useState(null); // 'buyer' or 'seller'
+  
+  // Track all registered users in localStorage
+  const [registeredUsers, setRegisteredUsers] = useState(() => {
+    const savedUsers = localStorage.getItem('registeredUsers');
+    return savedUsers ? JSON.parse(savedUsers) : [];
+  });
 
   // Simulate loading user from localStorage on first render
   useEffect(() => {
@@ -29,61 +35,69 @@ export const AuthProvider = ({ children }) => {
     }
     setLoading(false);
   }, []);
+  
+  // Save registered users to localStorage when updated
+  useEffect(() => {
+    localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
+  }, [registeredUsers]);
 
-  // Simulate login
+  // Simulate login with validation against registered users
   const login = (email, password, type) => {
-    // This would connect to a real API in production
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        // Simulate successful login
-        const user = { 
-          id: Date.now(), 
-          email,
-          userType: type,
-          name: type === 'seller' ? 'Demo Seller' : 'Demo Buyer',
-          phone: '+91 9876543210',
-          address: type === 'seller' ? '123 Business Park, Mumbai, India' : '456 Residential Colony, Delhi, India',
-          createdAt: new Date().toISOString(),
-          profile: {
-            avatar: `https://ui-avatars.com/api/?name=${email.split('@')[0]}&background=random`,
-            bio: type === 'seller' ? 'Passionate about providing quality products to customers.' : 'I love shopping for quality products.',
-            preferences: {
-              notifications: true,
-              newsletter: true
-            },
-            lastLogin: new Date().toISOString()
-          }
-        };
+        // Check if user exists in registered users
+        const foundUser = registeredUsers.find(user => 
+          user.email === email && user.password === password && user.userType === type
+        );
         
-        localStorage.setItem('user', JSON.stringify(user));
-        setCurrentUser(user);
-        setUserType(type);
-        toast.success('Logged in successfully!');
-        resolve(user);
+        if (foundUser) {
+          // Clone user data but exclude password for security
+          const { password, ...userWithoutPassword } = foundUser;
+          
+          // Update login time
+          userWithoutPassword.profile.lastLogin = new Date().toISOString();
+          
+          localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+          setCurrentUser(userWithoutPassword);
+          setUserType(type);
+          toast.success('Logged in successfully!');
+          resolve(userWithoutPassword);
+        } else {
+          toast.error('Invalid email, password, or account type');
+          reject(new Error('Invalid credentials'));
+        }
       }, 1000);
     });
   };
 
-  // Simulate registration
+  // Register new user and save to registeredUsers
   const register = (email, password, type, userData = {}) => {
-    // This would connect to a real API in production
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        // Simulate successful registration
+        // Check if user already exists
+        const userExists = registeredUsers.some(user => user.email === email && user.userType === type);
+        
+        if (userExists) {
+          toast.error(`An account with this email already exists as a ${type}`);
+          reject(new Error('User already exists'));
+          return;
+        }
+        
         const name = userData.name || email.split('@')[0];
         const phone = userData.phone || '';
         const address = userData.address || '';
         
         const user = { 
           id: Date.now(), 
-          email, 
+          email,
+          password, // Store password for validation (in real app, this would be hashed)
           userType: type,
           name,
           phone,
           address,
           createdAt: new Date().toISOString(),
           profile: {
-            avatar: `https://ui-avatars.com/api/?name=${name}&background=random`,
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`,
             bio: type === 'seller' ? 'Welcome to my shop!' : 'I\'m a new shopper!',
             preferences: {
               notifications: true,
@@ -106,11 +120,15 @@ export const AuthProvider = ({ children }) => {
           };
         }
         
-        localStorage.setItem('user', JSON.stringify(user));
-        setCurrentUser(user);
+        // Add user to registeredUsers
+        const { password: _, ...userWithoutPassword } = user;
+        setRegisteredUsers(prev => [...prev, user]);
+        
+        localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+        setCurrentUser(userWithoutPassword);
         setUserType(type);
         toast.success('Account created successfully!');
-        resolve(user);
+        resolve(userWithoutPassword);
       }, 1000);
     });
   };
@@ -121,6 +139,14 @@ export const AuthProvider = ({ children }) => {
       setTimeout(() => {
         try {
           const updatedUser = { ...currentUser, ...userData };
+          
+          // Update the user in registeredUsers
+          setRegisteredUsers(prev => 
+            prev.map(user => 
+              user.id === currentUser.id ? { ...user, ...userData, password: user.password } : user
+            )
+          );
+          
           localStorage.setItem('user', JSON.stringify(updatedUser));
           setCurrentUser(updatedUser);
           toast.success('Profile updated successfully!');
@@ -148,7 +174,8 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     updateProfile,
-    logout
+    logout,
+    registeredUsers
   };
 
   return (

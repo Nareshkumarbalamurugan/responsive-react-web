@@ -84,6 +84,9 @@ export const CartProvider = ({ children }) => {
   // Remove item from cart
   const removeFromCart = (productId) => {
     setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
+    
+    // Also remove any offers for this product
+    setAppliedOffers(prev => prev.filter(offer => offer.productId !== productId));
   };
 
   // Update quantity of an item
