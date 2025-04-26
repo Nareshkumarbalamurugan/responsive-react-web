@@ -10,6 +10,7 @@ export const useCart = () => {
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
+  const [appliedOffers, setAppliedOffers] = useState([]);
 
   // Load cart from localStorage on initial render
   useEffect(() => {
@@ -23,6 +24,17 @@ export const CartProvider = ({ children }) => {
         setCartItems([]);
       }
     }
+    
+    // Load applied offers
+    const savedOffers = localStorage.getItem('appliedOffers');
+    if (savedOffers) {
+      try {
+        setAppliedOffers(JSON.parse(savedOffers));
+      } catch (error) {
+        console.error('Failed to parse offers from localStorage:', error);
+        setAppliedOffers([]);
+      }
+    }
   }, []);
 
   // Update localStorage whenever cart changes
@@ -34,9 +46,21 @@ export const CartProvider = ({ children }) => {
     }
     
     // Calculate total price
-    const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const total = cartItems.reduce((sum, item) => {
+      const offerPrice = item.offerPrice || item.price;
+      return sum + (offerPrice * item.quantity);
+    }, 0);
     setTotalPrice(total);
   }, [cartItems]);
+  
+  // Save applied offers to localStorage
+  useEffect(() => {
+    if (appliedOffers.length > 0) {
+      localStorage.setItem('appliedOffers', JSON.stringify(appliedOffers));
+    } else {
+      localStorage.removeItem('appliedOffers');
+    }
+  }, [appliedOffers]);
 
   // Add item to cart
   const addToCart = (product) => {
@@ -75,11 +99,70 @@ export const CartProvider = ({ children }) => {
       )
     );
   };
+  
+  // Apply offer to a product
+  const applyOffer = (productId, offerPrice, offerCode) => {
+    setCartItems(prevItems =>
+      prevItems.map(item =>
+        item.id === productId
+          ? { ...item, offerPrice, offerCode }
+          : item
+      )
+    );
+    
+    // Add to applied offers
+    setAppliedOffers(prev => {
+      // Remove any existing offer for this product
+      const filtered = prev.filter(offer => offer.productId !== productId);
+      // Add the new offer
+      return [...filtered, { productId, offerPrice, offerCode, appliedAt: new Date().toISOString() }];
+    });
+  };
+  
+  // Remove offer from a product
+  const removeOffer = (productId) => {
+    setCartItems(prevItems =>
+      prevItems.map(item =>
+        item.id === productId
+          ? { ...item, offerPrice: undefined, offerCode: undefined }
+          : item
+      )
+    );
+    
+    // Remove from applied offers
+    setAppliedOffers(prev => prev.filter(offer => offer.productId !== productId));
+  };
+
+  // Apply coupon to entire cart
+  const applyCoupon = (couponCode) => {
+    // In a real application, this would validate the coupon with a backend API
+    // For demo purposes, we'll just apply a 10% discount for any coupon
+    const validCoupons = {
+      'WELCOME10': { discount: 0.1, type: 'percentage' },
+      'FLAT100': { discount: 100, type: 'fixed' },
+      'SUMMER20': { discount: 0.2, type: 'percentage' }
+    };
+    
+    const coupon = validCoupons[couponCode];
+    if (!coupon) return false;
+    
+    // Store the applied coupon
+    localStorage.setItem('appliedCoupon', JSON.stringify({
+      code: couponCode,
+      ...coupon,
+      appliedAt: new Date().toISOString()
+    }));
+    
+    return true;
+  };
 
   // Clear the entire cart
   const clearCart = () => {
     setCartItems([]);
+    setAppliedOffers([]);
     localStorage.removeItem('cart');
+    localStorage.removeItem('appliedOffers');
+    localStorage.removeItem('appliedCoupon');
   };
 
   const value = {
@@ -88,7 +171,11 @@ export const CartProvider = ({ children }) => {
     addToCart,
     removeFromCart,
     updateQuantity,
-    clearCart
+    applyOffer,
+    removeOffer,
+    applyCoupon,
+    clearCart,
+    appliedOffers
   };
 
   return (

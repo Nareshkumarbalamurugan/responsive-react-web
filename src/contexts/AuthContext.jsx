@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 const AuthContext = createContext();
 
@@ -37,40 +38,98 @@ export const AuthProvider = ({ children }) => {
         // Simulate successful login
         const user = { 
           id: Date.now(), 
-          email, 
+          email,
           userType: type,
-          // Add other user details that would come from an API
           name: type === 'seller' ? 'Demo Seller' : 'Demo Buyer',
-          createdAt: new Date().toISOString()
+          phone: '+91 9876543210',
+          address: type === 'seller' ? '123 Business Park, Mumbai, India' : '456 Residential Colony, Delhi, India',
+          createdAt: new Date().toISOString(),
+          profile: {
+            avatar: `https://ui-avatars.com/api/?name=${email.split('@')[0]}&background=random`,
+            bio: type === 'seller' ? 'Passionate about providing quality products to customers.' : 'I love shopping for quality products.',
+            preferences: {
+              notifications: true,
+              newsletter: true
+            },
+            lastLogin: new Date().toISOString()
+          }
         };
         
         localStorage.setItem('user', JSON.stringify(user));
         setCurrentUser(user);
         setUserType(type);
+        toast.success('Logged in successfully!');
         resolve(user);
       }, 1000);
     });
   };
 
   // Simulate registration
-  const register = (email, password, type) => {
+  const register = (email, password, type, userData = {}) => {
     // This would connect to a real API in production
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         // Simulate successful registration
+        const name = userData.name || email.split('@')[0];
+        const phone = userData.phone || '';
+        const address = userData.address || '';
+        
         const user = { 
           id: Date.now(), 
           email, 
           userType: type,
-          name: email.split('@')[0], // Default name from email
-          createdAt: new Date().toISOString()
+          name,
+          phone,
+          address,
+          createdAt: new Date().toISOString(),
+          profile: {
+            avatar: `https://ui-avatars.com/api/?name=${name}&background=random`,
+            bio: type === 'seller' ? 'Welcome to my shop!' : 'I\'m a new shopper!',
+            preferences: {
+              notifications: true,
+              newsletter: true
+            },
+            lastLogin: new Date().toISOString()
+          }
         };
+        
+        // Add seller-specific details
+        if (type === 'seller') {
+          user.businessName = userData.businessName || `${name}'s Store`;
+          user.gstNumber = userData.gstNumber || '';
+          user.sellerType = userData.sellerType || 'individual';
+          user.businessAddress = userData.businessAddress || address;
+          user.bankDetails = {
+            accountNumber: userData.accountNumber || '',
+            ifscCode: userData.ifscCode || '',
+            bankName: userData.bankName || ''
+          };
+        }
         
         localStorage.setItem('user', JSON.stringify(user));
         setCurrentUser(user);
         setUserType(type);
+        toast.success('Account created successfully!');
         resolve(user);
       }, 1000);
+    });
+  };
+
+  // Update user profile
+  const updateProfile = (userData) => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        try {
+          const updatedUser = { ...currentUser, ...userData };
+          localStorage.setItem('user', JSON.stringify(updatedUser));
+          setCurrentUser(updatedUser);
+          toast.success('Profile updated successfully!');
+          resolve(updatedUser);
+        } catch (error) {
+          toast.error('Failed to update profile');
+          reject(error);
+        }
+      }, 800);
     });
   };
 
@@ -79,6 +138,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
     setCurrentUser(null);
     setUserType(null);
+    toast.success('Logged out successfully');
   };
 
   const value = {
@@ -87,6 +147,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     register,
+    updateProfile,
     logout
   };
 

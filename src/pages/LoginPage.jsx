@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('seller');
@@ -44,7 +45,6 @@ const LoginPage = () => {
     try {
       setLoading(true);
       await login(email, password, activeTab);
-      toast.success('Logged in successfully');
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);
@@ -79,6 +79,20 @@ const LoginPage = () => {
           </button>
         </div>
         
+        {activeTab === 'seller' ? (
+          <div className="mb-6 p-4 bg-blue-50 rounded-md">
+            <p className="text-sm text-blue-700">
+              Login as a seller to manage your products, check orders, and track analytics.
+            </p>
+          </div>
+        ) : (
+          <div className="mb-6 p-4 bg-green-50 rounded-md">
+            <p className="text-sm text-green-700">
+              Login as a buyer to access your orders, wishlist, and personalized recommendations.
+            </p>
+          </div>
+        )}
+        
         <form onSubmit={handleLogin}>
           <div className="mb-4">
             <label htmlFor="email" className="block text-gray-700 mb-2">Email address</label>
@@ -110,11 +124,21 @@ const LoginPage = () => {
             {errors.password && (
               <p className="text-red-500 text-sm mt-1">{errors.password}</p>
             )}
-            <div className="mt-1 text-right">
-              <Link to="/forgot-password" className="text-blue-600 text-sm">
-                Forgot password?
-              </Link>
-            </div>
+          </div>
+          
+          <div className="flex justify-between items-center mb-6">
+            <label className="flex items-center">
+              <input 
+                type="checkbox" 
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 text-blue-600"
+              />
+              <span className="ml-2 text-gray-700 text-sm">Remember me</span>
+            </label>
+            <Link to="/forgot-password" className="text-blue-600 text-sm hover:underline">
+              Forgot password?
+            </Link>
           </div>
           
           <button
