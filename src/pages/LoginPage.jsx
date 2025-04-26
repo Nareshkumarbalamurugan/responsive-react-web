@@ -7,16 +7,37 @@ import { toast } from 'sonner';
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('seller'); // 'seller' or 'buyer'
+  const [activeTab, setActiveTab] = useState('seller');
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    // Email validation
+    if (!email) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
+    // Password validation
+    if (!password) {
+      newErrors.password = 'Password is required';
+    } else if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters long';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     
-    if (!email || !password) {
-      toast.error('Please fill in all fields');
+    if (!validateForm()) {
       return;
     }
     
@@ -42,7 +63,7 @@ const LoginPage = () => {
         <div className="flex mb-6 border-b border-gray-200">
           <button
             className={`flex-1 py-3 text-center font-medium ${
-              activeTab === 'seller' ? 'tab-active' : 'text-gray-500'
+              activeTab === 'seller' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
             }`}
             onClick={() => setActiveTab('seller')}
           >
@@ -50,7 +71,7 @@ const LoginPage = () => {
           </button>
           <button
             className={`flex-1 py-3 text-center font-medium ${
-              activeTab === 'buyer' ? 'tab-active' : 'text-gray-500'
+              activeTab === 'buyer' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
             }`}
             onClick={() => setActiveTab('buyer')}
           >
@@ -66,9 +87,13 @@ const LoginPage = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGreen"
-              required
+              className={`w-full border ${
+                errors.email ? 'border-red-500' : 'border-gray-300'
+              } rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            )}
           </div>
           
           <div className="mb-6">
@@ -78,11 +103,15 @@ const LoginPage = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGreen"
-              required
+              className={`w-full border ${
+                errors.password ? 'border-red-500' : 'border-gray-300'
+              } rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+            )}
             <div className="mt-1 text-right">
-              <Link to="/forgot-password" className="text-brandBlue text-sm">
+              <Link to="/forgot-password" className="text-blue-600 text-sm">
                 Forgot password?
               </Link>
             </div>
@@ -91,9 +120,9 @@ const LoginPage = () => {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full bg-[#3a5a9b] text-white py-3 rounded-md font-medium ${
-              loading ? 'opacity-70 cursor-not-allowed' : 'hover:opacity-90'
-            } transition-opacity`}
+            className={`w-full bg-blue-600 text-white py-3 rounded-md font-medium ${
+              loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-700'
+            } transition-colors`}
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
@@ -101,7 +130,7 @@ const LoginPage = () => {
           <div className="mt-6 text-center">
             <p>
               Don't have an account?{' '}
-              <Link to="/register" className="text-brandBlue">
+              <Link to="/register" className="text-blue-600">
                 Register
               </Link>
             </p>

@@ -8,21 +8,44 @@ const RegisterPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('seller'); // 'seller' or 'buyer'
+  const [activeTab, setActiveTab] = useState('seller');
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    // Email validation
+    if (!email) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
+    // Password validation
+    if (!password) {
+      newErrors.password = 'Password is required';
+    } else if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters long';
+    }
+    
+    // Confirm password validation
+    if (!confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
     
-    if (!email || !password || !confirmPassword) {
-      toast.error('Please fill in all fields');
-      return;
-    }
-    
-    if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
+    if (!validateForm()) {
       return;
     }
     
@@ -48,7 +71,7 @@ const RegisterPage = () => {
         <div className="flex mb-6 border-b border-gray-200">
           <button
             className={`flex-1 py-3 text-center font-medium ${
-              activeTab === 'seller' ? 'tab-active' : 'text-gray-500'
+              activeTab === 'seller' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
             }`}
             onClick={() => setActiveTab('seller')}
           >
@@ -56,7 +79,7 @@ const RegisterPage = () => {
           </button>
           <button
             className={`flex-1 py-3 text-center font-medium ${
-              activeTab === 'buyer' ? 'tab-active' : 'text-gray-500'
+              activeTab === 'buyer' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'
             }`}
             onClick={() => setActiveTab('buyer')}
           >
@@ -72,9 +95,13 @@ const RegisterPage = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGreen"
-              required
+              className={`w-full border ${
+                errors.email ? 'border-red-500' : 'border-gray-300'
+              } rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            )}
           </div>
           
           <div className="mb-4">
@@ -84,21 +111,31 @@ const RegisterPage = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGreen"
-              required
+              className={`w-full border ${
+                errors.password ? 'border-red-500' : 'border-gray-300'
+              } rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+            )}
           </div>
           
           <div className="mb-6">
-            <label htmlFor="confirmPassword" className="block text-gray-700 mb-2">Confirm Password</label>
+            <label htmlFor="confirmPassword" className="block text-gray-700 mb-2">
+              Confirm Password
+            </label>
             <input
               id="confirmPassword"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-brandGreen"
-              required
+              className={`w-full border ${
+                errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+              } rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
             />
+            {errors.confirmPassword && (
+              <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
+            )}
           </div>
           
           {activeTab === 'seller' && (
@@ -113,9 +150,9 @@ const RegisterPage = () => {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full bg-[#3a5a9b] text-white py-3 rounded-md font-medium ${
-              loading ? 'opacity-70 cursor-not-allowed' : 'hover:opacity-90'
-            } transition-opacity`}
+            className={`w-full bg-blue-600 text-white py-3 rounded-md font-medium ${
+              loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-700'
+            } transition-colors`}
           >
             {loading ? 'Creating Account...' : 'Register'}
           </button>
@@ -123,7 +160,7 @@ const RegisterPage = () => {
           <div className="mt-6 text-center">
             <p>
               Already have an account?{' '}
-              <Link to="/login" className="text-brandBlue">
+              <Link to="/login" className="text-blue-600">
                 Login
               </Link>
             </p>
