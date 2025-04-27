@@ -178,7 +178,8 @@ export const CartProvider = ({ children }) => {
     removeOffer,
     applyCoupon,
     clearCart,
-    appliedOffers
+    appliedOffers,
+    cart: cartItems // Add cart as an alias to cartItems for compatibility
   };
 
   return (

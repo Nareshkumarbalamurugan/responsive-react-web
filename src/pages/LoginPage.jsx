@@ -1,7 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { verifyLogin } from '../utils/authUtils';
 import { toast } from 'sonner';
 
 const LoginPage = () => {
@@ -10,9 +11,18 @@ const LoginPage = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('seller');
+  const [activeTab, setActiveTab] = useState('buyer');
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (currentUser) {
+      navigate('/');
+      toast.info('You are already logged in');
+    }
+  }, [navigate]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -44,7 +54,25 @@ const LoginPage = () => {
     
     try {
       setLoading(true);
+      
+      // Verify login directly first
+      const user = verifyLogin(email, password);
+      
+      if (!user) {
+        toast.error('Invalid email or password. Please try again.');
+        setLoading(false);
+        return;
+      }
+      
+      if (user.userType !== activeTab) {
+        toast.error(`This account is registered as a ${user.userType}, not as a ${activeTab}`);
+        setLoading(false);
+        return;
+      }
+
+      // Now proceed with login function from context
       await login(email, password, activeTab);
+      toast.success('Logged in successfully!');
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);
@@ -154,7 +182,7 @@ const LoginPage = () => {
           <div className="mt-6 text-center">
             <p>
               Don't have an account?{' '}
-              <Link to="/register" className="text-blue-600">
+              <Link to="/register" className="text-blue-600 hover:underline">
                 Register
               </Link>
             </p>

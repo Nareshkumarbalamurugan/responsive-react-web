@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { verifyLogin, saveCurrentUser, getCurrentUser, clearCurrentUser } from '../utils/authUtils';
 
 const AuthContext = createContext();
 
@@ -19,19 +20,12 @@ export const AuthProvider = ({ children }) => {
     return savedUsers ? JSON.parse(savedUsers) : [];
   });
 
-  // Simulate loading user from localStorage on first render
+  // Load user from localStorage on first render
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      try {
-        const parsedUser = JSON.parse(savedUser);
-        setCurrentUser(parsedUser);
-        setUserType(parsedUser.userType);
-      } catch (error) {
-        console.error('Failed to parse user from localStorage:', error);
-        setCurrentUser(null);
-        setUserType(null);
-      }
+    const user = getCurrentUser();
+    if (user) {
+      setCurrentUser(user);
+      setUserType(user.userType);
     }
     setLoading(false);
   }, []);
@@ -41,32 +35,35 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
   }, [registeredUsers]);
 
-  // Simulate login with validation against registered users
+  // Login with validation against registered users
   const login = (email, password, type) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         // Check if user exists in registered users
-        const foundUser = registeredUsers.find(user => 
-          user.email === email && user.password === password && user.userType === type
-        );
+        const user = verifyLogin(email, password);
         
-        if (foundUser) {
-          // Clone user data but exclude password for security
-          const { password, ...userWithoutPassword } = foundUser;
-          
-          // Update login time
-          userWithoutPassword.profile.lastLogin = new Date().toISOString();
-          
-          localStorage.setItem('user', JSON.stringify(userWithoutPassword));
-          setCurrentUser(userWithoutPassword);
-          setUserType(type);
-          toast.success('Logged in successfully!');
-          resolve(userWithoutPassword);
-        } else {
-          toast.error('Invalid email, password, or account type');
+        if (!user) {
           reject(new Error('Invalid credentials'));
+          return;
         }
-      }, 1000);
+        
+        if (user.userType !== type) {
+          reject(new Error(`This account is registered as a ${user.userType}, not as a ${type}`));
+          return;
+        }
+        
+        // Clone user data but exclude password for security
+        const { password: _, ...userWithoutPassword } = user;
+        
+        // Update login time
+        userWithoutPassword.profile = userWithoutPassword.profile || {};
+        userWithoutPassword.profile.lastLogin = new Date().toISOString();
+        
+        saveCurrentUser(userWithoutPassword);
+        setCurrentUser(userWithoutPassword);
+        setUserType(type);
+        resolve(userWithoutPassword);
+      }, 500);
     });
   };
 
@@ -124,12 +121,11 @@ export const AuthProvider = ({ children }) => {
         const { password: _, ...userWithoutPassword } = user;
         setRegisteredUsers(prev => [...prev, user]);
         
-        localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+        saveCurrentUser(userWithoutPassword);
         setCurrentUser(userWithoutPassword);
         setUserType(type);
-        toast.success('Account created successfully!');
         resolve(userWithoutPassword);
-      }, 1000);
+      }, 500);
     });
   };
 
@@ -147,7 +143,7 @@ export const AuthProvider = ({ children }) => {
             )
           );
           
-          localStorage.setItem('user', JSON.stringify(updatedUser));
+          saveCurrentUser(updatedUser);
           setCurrentUser(updatedUser);
           toast.success('Profile updated successfully!');
           resolve(updatedUser);
@@ -155,13 +151,13 @@ export const AuthProvider = ({ children }) => {
           toast.error('Failed to update profile');
           reject(error);
         }
-      }, 800);
+      }, 300);
     });
   };
 
   // Logout
   const logout = () => {
-    localStorage.removeItem('user');
+    clearCurrentUser();
     setCurrentUser(null);
     setUserType(null);
     toast.success('Logged out successfully');

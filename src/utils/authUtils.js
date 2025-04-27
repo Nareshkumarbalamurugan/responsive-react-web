@@ -66,3 +66,13 @@ export const getCurrentUser = () => {
 export const clearCurrentUser = () => {
   localStorage.removeItem('currentUser');
 };
+
+// Get all registered users
+export const getRegisteredUsers = () => {
+  try {
+    return JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+  } catch (error) {
+    console.error('Error parsing registered users from localStorage', error);
+    return [];
+  }
+};
