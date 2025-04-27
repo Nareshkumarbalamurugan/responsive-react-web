@@ -1,15 +1,17 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Search, X } from 'lucide-react';
 
 const SearchBar = ({ className = "", placeholder = "Search products...", fullWidth = false }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchTerm.trim()) {
+      // Always navigate to shop page with search parameter
       navigate(`/shop?search=${encodeURIComponent(searchTerm.trim())}`);
     }
   };

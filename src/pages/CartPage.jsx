@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
 import AddressForm from '../components/AddressForm';
+import PaymentOptions from '../components/PaymentOptions';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const CartPage = () => {
@@ -12,6 +12,7 @@ const CartPage = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [userAddress, setUserAddress] = useState(null);
   
   // Calculate total price
@@ -56,9 +57,14 @@ const CartPage = () => {
       return;
     }
     
-    // Process checkout with the address
+    // Show payment options
+    setIsPaymentDialogOpen(true);
+  };
+  
+  const handlePaymentComplete = () => {
     toast.success('Order placed successfully!');
     clearCart();
+    setIsPaymentDialogOpen(false);
     navigate('/');
   };
   
@@ -214,7 +220,7 @@ const CartPage = () => {
                 className="w-full py-3 bg-brandGreen text-white font-medium rounded-md hover:opacity-90 transition-opacity"
                 onClick={handleCheckout}
               >
-                {userAddress ? 'Place Order' : 'Continue to Delivery'}
+                {!currentUser ? "Login to Checkout" : userAddress ? 'Proceed to Payment' : 'Add Delivery Address'}
               </button>
               
               <div className="mt-6 text-center">
@@ -237,6 +243,19 @@ const CartPage = () => {
             </DialogDescription>
           </DialogHeader>
           <AddressForm onSave={handleSaveAddress} initialAddress={userAddress} />
+        </DialogContent>
+      </Dialog>
+      
+      {/* Payment Dialog */}
+      <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Payment</DialogTitle>
+            <DialogDescription>
+              Choose your payment method
+            </DialogDescription>
+          </DialogHeader>
+          <PaymentOptions total={total} onPaymentComplete={handlePaymentComplete} />
         </DialogContent>
       </Dialog>
     </div>
