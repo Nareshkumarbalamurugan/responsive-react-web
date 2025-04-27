@@ -1,9 +1,13 @@
 
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
+import { useIsMobile } from '../hooks/use-mobile';
+import ProductReview from '../components/ProductReview';
+import { Star } from 'lucide-react';
+import { Card, CardContent } from "@/components/ui/card";
 
 // Mock product data (expanded from ShopPage with INR prices)
 const products = [
@@ -213,6 +217,8 @@ const ProductDetailPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState('details');
   const [selectedOffer, setSelectedOffer] = useState(null);
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
   // Find the product based on the URL parameter
   const product = products.find(p => p.id === parseInt(productId)) || products[0];
@@ -235,13 +241,28 @@ const ProductDetailPage = () => {
   const handleBuyNow = () => {
     handleAddToCart();
     // Navigate to cart page
-    window.location.href = '/cart';
+    navigate('/cart');
+  };
+
+  useEffect(() => {
+    // Reset scroll position when product changes
+    window.scrollTo(0, 0);
+  }, [productId]);
+
+  const handleSubmitReview = (review) => {
+    // In a real application, this would send the review to a backend
+    toast.success("Thank you for your review!");
+    
+    // For now, we're just updating the UI
+    if (product.reviews) {
+      product.reviews.push(review);
+    }
   };
 
   return (
-    <div className="py-12">
-      <div className="container mx-auto px-6">
-        <div className="flex flex-col lg:flex-row gap-10">
+    <div className="py-8 md:py-12">
+      <div className="container mx-auto px-4 md:px-6">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-10">
           {/* Product Image */}
           <div className="lg:w-1/2">
             <div className="bg-white p-4 rounded-lg shadow-md">
@@ -287,19 +308,14 @@ const ProductDetailPage = () => {
           
           {/* Product Details */}
           <div className="lg:w-1/2">
-            <h1 className="text-3xl font-bold mb-3">{product.name}</h1>
+            <h1 className="text-2xl md:text-3xl font-bold mb-3">{product.name}</h1>
             <div className="flex items-center mb-4">
               <div className="flex text-yellow-400 mr-2">
-                {Array(5).fill().map((_, i) => (
-                  <svg 
+                {[...Array(5)].map((_, i) => (
+                  <Star 
                     key={i} 
-                    className="w-5 h-5" 
-                    fill={i < Math.floor(product.seller.rating) ? "currentColor" : "none"} 
-                    viewBox="0 0 24 24" 
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                  </svg>
+                    className={`w-5 h-5 ${i < Math.floor(product.seller.rating) ? 'fill-yellow-400' : 'text-gray-300'}`}
+                  />
                 ))}
               </div>
               <span className="text-gray-600">{product.seller.rating} ({product.reviews.length} reviews)</span>
@@ -307,17 +323,17 @@ const ProductDetailPage = () => {
             
             {/* Price display with offer */}
             <div className="mb-6 bg-gray-50 p-4 rounded-md border border-gray-100">
-              <div className="flex items-center mb-2">
+              <div className="flex flex-wrap items-center mb-2 gap-2">
                 <span className="text-3xl font-bold text-brandGreen">
                   ₹{(selectedOffer?.price || product.offerPrice || product.price).toFixed(2)}
                 </span>
                 {(selectedOffer?.price || product.offerPrice) && (
-                  <span className="text-lg text-gray-500 line-through ml-2">
+                  <span className="text-lg text-gray-500 line-through">
                     ₹{product.price.toFixed(2)}
                   </span>
                 )}
                 {savings > 0 && (
-                  <span className="ml-3 bg-green-100 text-green-700 px-2 py-1 rounded text-sm">
+                  <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-sm">
                     Save ₹{savings.toFixed(2)} ({savingsPercentage}% off)
                   </span>
                 )}
@@ -333,7 +349,7 @@ const ProductDetailPage = () => {
                 <h3 className="text-lg font-medium text-orange-700 mb-3">Available Offers</h3>
                 <ul className="space-y-2">
                   {product.offers.map((offer, idx) => (
-                    <li key={idx} className="flex items-center">
+                    <li key={idx} className="flex items-start md:items-center flex-col md:flex-row md:gap-2">
                       <span className="text-orange-600 mr-2">•</span>
                       <div className="flex-1">
                         <span className="font-medium text-gray-800">{offer.code}:</span>{' '}
@@ -341,7 +357,7 @@ const ProductDetailPage = () => {
                       </div>
                       {offer.discount && (
                         <button 
-                          className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded hover:bg-orange-200 transition-colors"
+                          className="mt-2 md:mt-0 text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded hover:bg-orange-200 transition-colors"
                           onClick={() => setSelectedOffer(offer.discount ? {
                             price: product.price - offer.discount,
                             code: offer.code
@@ -424,8 +440,8 @@ const ProductDetailPage = () => {
             </div>
             
             {currentUser && (
-              <div className="mt-6 flex items-center">
-                <button className="flex items-center mr-6 text-gray-600 hover:text-red-500">
+              <div className="mt-6 flex flex-wrap items-center gap-4">
+                <button className="flex items-center text-gray-600 hover:text-red-500">
                   <svg className="w-5 h-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>
@@ -443,11 +459,11 @@ const ProductDetailPage = () => {
         </div>
         
         {/* Product Details Tabs */}
-        <div className="mt-16">
-          <div className="border-b border-gray-200">
-            <nav className="flex -mb-px">
+        <div className="mt-12">
+          <div className={`border-b border-gray-200 ${isMobile ? 'overflow-x-auto' : ''}`}>
+            <nav className={`flex ${isMobile ? 'w-max' : ''}`}>
               <button 
-                className={`py-4 px-6 font-medium ${
+                className={`py-4 px-4 md:px-6 font-medium whitespace-nowrap ${
                   activeTab === 'details' 
                     ? 'border-b-2 border-brandGreen text-brandGreen' 
                     : 'text-gray-500'
@@ -457,7 +473,7 @@ const ProductDetailPage = () => {
                 Product Details
               </button>
               <button 
-                className={`py-4 px-6 font-medium ${
+                className={`py-4 px-4 md:px-6 font-medium whitespace-nowrap ${
                   activeTab === 'reviews' 
                     ? 'border-b-2 border-brandGreen text-brandGreen' 
                     : 'text-gray-500'
@@ -467,7 +483,7 @@ const ProductDetailPage = () => {
                 Reviews ({product.reviews.length})
               </button>
               <button 
-                className={`py-4 px-6 font-medium ${
+                className={`py-4 px-4 md:px-6 font-medium whitespace-nowrap ${
                   activeTab === 'nutrition' 
                     ? 'border-b-2 border-brandGreen text-brandGreen' 
                     : 'text-gray-500'
@@ -479,7 +495,7 @@ const ProductDetailPage = () => {
             </nav>
           </div>
           
-          <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
+          <div className="mt-8 bg-white p-4 md:p-6 rounded-lg shadow-md">
             {activeTab === 'details' && (
               <>
                 <p className="mb-4">{product.description}</p>
@@ -497,39 +513,11 @@ const ProductDetailPage = () => {
             )}
             
             {activeTab === 'reviews' && (
-              <div>
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-lg font-medium">Customer Reviews</h3>
-                  {currentUser && (
-                    <button className="bg-brandGreen text-white px-4 py-2 rounded-md text-sm">
-                      Write a Review
-                    </button>
-                  )}
-                </div>
-                
-                {product.reviews.map(review => (
-                  <div key={review.id} className="border-b border-gray-200 py-4 last:border-b-0">
-                    <div className="flex justify-between mb-2">
-                      <p className="font-medium">{review.user}</p>
-                      <p className="text-sm text-gray-500">{review.date}</p>
-                    </div>
-                    <div className="flex text-yellow-400 mb-2">
-                      {Array(5).fill().map((_, i) => (
-                        <svg 
-                          key={i} 
-                          className="w-4 h-4" 
-                          fill={i < review.rating ? "currentColor" : "none"} 
-                          viewBox="0 0 24 24" 
-                          stroke="currentColor"
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                        </svg>
-                      ))}
-                    </div>
-                    <p className="text-gray-700">{review.comment}</p>
-                  </div>
-                ))}
-              </div>
+              <ProductReview 
+                productId={product.id}
+                existingReviews={product.reviews}
+                onReviewSubmit={handleSubmitReview}
+              />
             )}
             
             {activeTab === 'nutrition' && (
@@ -580,6 +568,40 @@ const ProductDetailPage = () => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+        
+        {/* Related Products */}
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold mb-6">You may also like</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            {products
+              .filter(p => p.id !== product.id && p.category === product.category)
+              .slice(0, 4)
+              .map(relatedProduct => (
+                <Link 
+                  key={relatedProduct.id}
+                  to={`/product/${relatedProduct.id}`}
+                  className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+                >
+                  <div className="h-40 overflow-hidden">
+                    <img 
+                      src={relatedProduct.image}
+                      alt={relatedProduct.name}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="p-3">
+                    <h3 className="text-sm font-medium">{relatedProduct.name}</h3>
+                    <div className="flex items-center mt-1">
+                      <span className="text-brandGreen font-medium">₹{relatedProduct.offerPrice || relatedProduct.price}</span>
+                      {relatedProduct.offerPrice && (
+                        <span className="ml-2 text-xs text-gray-500 line-through">₹{relatedProduct.price}</span>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              ))}
           </div>
         </div>
       </div>
