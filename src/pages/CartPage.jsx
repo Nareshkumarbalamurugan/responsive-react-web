@@ -8,14 +8,15 @@ import AddressForm from '../components/AddressForm';
 import PaymentOptions from '../components/PaymentOptions';
 
 const CartPage = () => {
-  const { cart, updateQuantity, removeFromCart, clearCart } = useCart();
+  const { cartItems, updateQuantity, removeFromCart, clearCart } = useCart();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
   const [address, setAddress] = useState(null);
 
-  const cartTotal = cart.reduce((sum, item) => {
+  // Use cartItems instead of cart for calculations
+  const cartTotal = cartItems.reduce((sum, item) => {
     return sum + (item.offerPrice || item.price) * item.quantity;
   }, 0);
 
@@ -34,7 +35,7 @@ const CartPage = () => {
   };
   
   const handleProceedToCheckout = () => {
-    if (cart.length === 0) {
+    if (cartItems.length === 0) {
       toast.error("Your cart is empty");
       return;
     }
@@ -54,7 +55,8 @@ const CartPage = () => {
     navigate('/orders');
   };
 
-  if (cart.length === 0 && !showAddressForm && !showPaymentOptions) {
+  // Check cartItems.length instead of cart.length
+  if (cartItems.length === 0 && !showAddressForm && !showPaymentOptions) {
     return (
       <div className="py-12">
         <div className="container mx-auto px-6 text-center">
@@ -99,7 +101,7 @@ const CartPage = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {cart.map(item => (
+                    {cartItems.map(item => (
                       <tr key={item.id} className="border-b">
                         <td className="py-4 px-6">
                           <div className="flex items-center">
@@ -165,7 +167,7 @@ const CartPage = () => {
                 
                 {/* Mobile Cart View */}
                 <div className={isMobile ? "divide-y" : "hidden"}>
-                  {cart.map(item => (
+                  {cartItems.map(item => (
                     <div key={item.id} className="p-4">
                       <div className="flex gap-4 mb-3">
                         <img
@@ -265,7 +267,7 @@ const CartPage = () => {
               
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal ({cart.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
+                  <span className="text-gray-600">Subtotal ({cartItems.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
                   <span className="font-medium">₹{cartTotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
@@ -308,7 +310,7 @@ const CartPage = () => {
                 <div className="bg-gray-50 p-4 rounded-md">
                   <h3 className="font-medium mb-2">Your Items:</h3>
                   <ul className="space-y-2">
-                    {cart.map(item => (
+                    {cartItems.map(item => (
                       <li key={item.id} className="flex justify-between text-sm">
                         <span>{item.name} × {item.quantity}</span>
                         <span>₹{((item.offerPrice || item.price) * item.quantity).toFixed(2)}</span>
