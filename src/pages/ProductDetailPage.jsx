@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
@@ -6,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
 import { useIsMobile } from '../hooks/use-mobile';
 import ProductReview from '../components/ProductReview';
-import { Star } from 'lucide-react';
+import { Star, Check } from 'lucide-react';
 import { Card, CardContent } from "@/components/ui/card";
 
 // Mock product data (expanded from ShopPage with INR prices)
@@ -90,7 +89,7 @@ const products = [
     name: 'Brown Eggs (12 pack)',
     price: 449,
     offerPrice: 399,
-    image: "https://images.unsplash.com/photo-1582722872445-44dc5f7e3c8f?w=800&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1598965675045-45c5e72c7d05?w=800&auto=format&fit=crop",
     category: 'dairy',
     description: 'Farm-fresh brown eggs from free-range chickens. High in protein and essential nutrients.',
     nutritionInfo: 'Rich source of high-quality protein, vitamin D, and B vitamins.',
@@ -115,7 +114,7 @@ const products = [
     name: 'Sourdough Bread',
     price: 359,
     offerPrice: 299,
-    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1586444248888-f140a5f2c1fb?w=800&auto=format&fit=crop",
     category: 'bakery',
     description: 'Artisanal sourdough bread made with traditional fermentation methods. Crusty outside, soft inside.',
     nutritionInfo: 'Contains probiotics from the fermentation process. Lower gluten content than regular bread.',
@@ -139,7 +138,7 @@ const products = [
     name: 'Orange Juice',
     price: 289,
     offerPrice: 249,
-    image: "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=800&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=800&auto=format&fit=crop",
     category: 'beverages',
     description: 'Freshly squeezed orange juice without added sugar or preservatives. Rich in vitamin C.',
     nutritionInfo: 'Excellent source of vitamin C. Contains natural antioxidants and flavonoids.',
@@ -164,7 +163,7 @@ const products = [
     name: 'Avocados (3 pack)',
     price: 549,
     offerPrice: 499,
-    image: "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?w=800&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1601039641847-7857b994d704?w=800&auto=format&fit=crop",
     category: 'fruits-vegetables',
     description: 'Perfectly ripe Hass avocados, ready to eat. Rich, creamy texture and buttery flavor.',
     nutritionInfo: 'High in healthy fats, fiber, and potassium. Contains vitamins K, E, and C.',
@@ -188,7 +187,7 @@ const products = [
     name: 'Chocolate Chip Cookies',
     price: 399,
     offerPrice: 349,
-    image: "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=800&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1582385760710-5102f5c477ef?w=800&auto=format&fit=crop",
     category: 'bakery',
     description: 'Freshly baked chocolate chip cookies with premium dark chocolate chunks and a hint of sea salt.',
     nutritionInfo: 'Made with real butter and brown sugar. Contains eggs, wheat, and dairy.',
@@ -221,7 +220,17 @@ const ProductDetailPage = () => {
   const isMobile = useIsMobile();
   
   // Find the product based on the URL parameter
-  const product = products.find(p => p.id === parseInt(productId)) || products[0];
+  const product = products.find(p => p.id === parseInt(productId));
+  
+  // Handle scenario where product is not found
+  if (!product) {
+    useEffect(() => {
+      toast.error("Product not found!");
+      navigate('/shop');
+    }, [navigate]);
+    
+    return <div className="p-10 text-center">Loading...</div>;
+  }
   
   // Calculate savings
   const savings = product.price - (selectedOffer?.price || product.offerPrice || product.price);
@@ -239,6 +248,12 @@ const ProductDetailPage = () => {
   };
 
   const handleBuyNow = () => {
+    if (!currentUser) {
+      toast.error("Please login to purchase items");
+      navigate('/login', { state: { from: `/product/${productId}` } });
+      return;
+    }
+    
     handleAddToCart();
     // Navigate to cart page
     navigate('/cart');
@@ -247,15 +262,29 @@ const ProductDetailPage = () => {
   useEffect(() => {
     // Reset scroll position when product changes
     window.scrollTo(0, 0);
+    // Reset selected offer when product changes
+    setSelectedOffer(null);
+    setQuantity(1);
   }, [productId]);
 
   const handleSubmitReview = (review) => {
+    if (!currentUser) {
+      toast.error("Please login to submit a review");
+      navigate('/login', { state: { from: `/product/${productId}` } });
+      return;
+    }
+    
     // In a real application, this would send the review to a backend
     toast.success("Thank you for your review!");
     
     // For now, we're just updating the UI
     if (product.reviews) {
-      product.reviews.push(review);
+      product.reviews.push({
+        ...review,
+        id: Date.now(),
+        user: currentUser.name || currentUser.email,
+        date: new Date().toISOString().split('T')[0]
+      });
     }
   };
 
@@ -407,9 +436,20 @@ const ProductDetailPage = () => {
                   className="bg-orange-500 text-white py-3 rounded-md font-medium hover:opacity-90 transition-opacity"
                   onClick={handleBuyNow}
                 >
-                  Buy Now
+                  {currentUser ? 'Buy Now' : 'Login to Buy'}
                 </button>
               </div>
+              
+              {!currentUser && (
+                <div className="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-md">
+                  <p className="text-sm text-blue-700 flex items-center">
+                    <svg className="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    Login to purchase products and save to your account
+                  </p>
+                </div>
+              )}
             </div>
             
             <div className="mb-6">

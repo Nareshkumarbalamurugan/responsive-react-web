@@ -27,6 +27,7 @@ import ProfilePage from "./pages/ProfilePage";
 import OrdersPage from "./pages/OrdersPage";
 import SellerDashboardPage from "./pages/SellerDashboardPage";
 import SearchBar from "./components/SearchBar";
+import ContactPage from "./pages/ContactPage";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,7 @@ const App = () => (
                   <Route path="/profile" element={<ProfilePage />} />
                   <Route path="/orders" element={<OrdersPage />} />
                   <Route path="/seller-dashboard" element={<SellerDashboardPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>

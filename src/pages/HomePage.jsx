@@ -1,17 +1,63 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
 import SearchBar from '../components/SearchBar';
 
 const HomePage = () => {
   const { addToCart } = useCart();
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
 
   const handleAddToCart = (product) => {
     addToCart(product);
     toast.success(`${product.name} added to cart!`);
   };
+  
+  const handleBuyNow = (product) => {
+    if (!currentUser) {
+      toast.error("Please login to purchase items");
+      navigate('/login', { state: { from: '/' } });
+      return;
+    }
+    
+    addToCart(product);
+    navigate('/cart');
+  };
+
+  // Featured products array with proper images
+  const featuredProducts = [
+    {
+      id: 1,
+      name: "Organic Bananas",
+      price: 99.99,
+      image: "https://images.unsplash.com/photo-1603833665858-e61d17a86224?w=800&auto=format&fit=crop",
+      description: "Fresh organic bananas sourced directly from farms."
+    },
+    {
+      id: 2,
+      name: "Fresh Milk",
+      price: 79.99,
+      image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=800&auto=format&fit=crop", 
+      description: "Farm-fresh whole milk, pasteurized and packed with nutrients."
+    },
+    {
+      id: 3,
+      name: "Whole Grain Bread",
+      price: 149.99,
+      image: "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=800&auto=format&fit=crop",
+      description: "Freshly baked whole grain bread, perfect for breakfast."
+    },
+    {
+      id: 4,
+      name: "Fresh Orange Juice",
+      price: 119.99,
+      image: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=800&auto=format&fit=crop",
+      description: "Freshly squeezed orange juice with no preservatives."
+    }
+  ];
 
   return (
     <div>
@@ -104,51 +150,38 @@ const HomePage = () => {
         <div className="container mx-auto px-6">
           <h2 className="text-3xl font-bold mb-10 text-center">Featured Products</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              {
-                id: 1,
-                name: "Organic Bananas",
-                price: 99.99,
-                image: "https://images.unsplash.com/photo-1603833665858-e61d17a86224?w=800&auto=format&fit=crop"
-              },
-              {
-                id: 2,
-                name: "Fresh Milk",
-                price: 79.99,
-                image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=800&auto=format&fit=crop"
-              },
-              {
-                id: 3,
-                name: "Whole Grain Bread",
-                price: 149.99,
-                image: "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=800&auto=format&fit=crop"
-              },
-              {
-                id: 4,
-                name: "Fresh Orange Juice",
-                price: 119.99,
-                image: "https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=800&auto=format&fit=crop"
-              }
-            ].map((product) => (
+            {featuredProducts.map((product) => (
               <div key={product.id} className="border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                <img 
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-52 object-cover"
-                />
+                <Link to={`/product/${product.id}`} className="block">
+                  <img 
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-52 object-cover"
+                  />
+                </Link>
                 <div className="p-4">
-                  <h3 className="font-medium text-lg mb-2">{product.name}</h3>
+                  <Link to={`/product/${product.id}`} className="block">
+                    <h3 className="font-medium text-lg mb-2">{product.name}</h3>
+                  </Link>
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-lg font-bold">₹{product.price.toFixed(2)}</span>
                     <span className="text-sm text-green-600 bg-green-50 px-2 py-1 rounded-full">In Stock</span>
                   </div>
-                  <p className="text-gray-500 text-sm mb-4">Fresh and organic, sourced directly from farms.</p>
-                  <button 
-                    className="w-full bg-brandGreen text-white py-2 rounded-md hover:opacity-90 transition-opacity"
-                    onClick={() => handleAddToCart(product)}
-                  >
-                    Add to Cart
-                  </button>
+                  <p className="text-gray-500 text-sm mb-4">{product.description}</p>
+                  <div className="flex gap-2">
+                    <button 
+                      className="flex-1 bg-brandGreen text-white py-2 rounded-md hover:opacity-90 transition-opacity"
+                      onClick={() => handleAddToCart(product)}
+                    >
+                      Add to Cart
+                    </button>
+                    <button 
+                      className="flex-1 border border-brandGreen text-brandGreen py-2 rounded-md hover:bg-green-50 transition-colors"
+                      onClick={() => handleBuyNow(product)}
+                    >
+                      Buy Now
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
