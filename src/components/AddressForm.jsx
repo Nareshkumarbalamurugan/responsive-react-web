@@ -1,150 +1,132 @@
 
 import React, { useState } from 'react';
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 
-const AddressForm = ({ onAddressSubmit }) => {
-  const form = useForm({
-    defaultValues: {
-      fullName: "",
-      addressLine1: "",
-      addressLine2: "",
-      city: "",
-      state: "",
-      pincode: "",
-      phone: "",
-    }
+const AddressForm = ({ onSave, initialAddress = null }) => {
+  const [address, setAddress] = useState(initialAddress || {
+    fullName: '',
+    streetAddress: '',
+    city: '',
+    state: '',
+    postalCode: '',
+    phoneNumber: '',
   });
 
-  const handleSubmit = (data) => {
-    if(onAddressSubmit) {
-      onAddressSubmit(data);
-    }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setAddress(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(address);
   };
 
   return (
-    <Card className="mb-6">
-      <CardContent className="pt-6">
-        <h3 className="text-lg font-medium mb-4">Delivery Address</h3>
-        
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="fullName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter your full name" {...field} required />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="addressLine1"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Address Line 1</FormLabel>
-                  <FormControl>
-                    <Input placeholder="House/Flat No., Building Name" {...field} required />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="addressLine2"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Address Line 2</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Street, Area, Landmark" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="city"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>City</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter city" {...field} required />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="state"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>State</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter state" {...field} required />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="pincode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Pincode</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter pincode" {...field} required maxLength={6} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter phone number" {...field} required maxLength={10} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            <div className="pt-2">
-              <button
-                type="submit"
-                className="w-full bg-brandGreen text-white py-2 rounded-md hover:opacity-90 transition-opacity"
-              >
-                Save Address
-              </button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+          Full Name
+        </label>
+        <input
+          type="text"
+          id="fullName"
+          name="fullName"
+          value={address.fullName}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brandGreen"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="streetAddress" className="block text-sm font-medium text-gray-700 mb-1">
+          Street Address
+        </label>
+        <input
+          type="text"
+          id="streetAddress"
+          name="streetAddress"
+          value={address.streetAddress}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brandGreen"
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+            City
+          </label>
+          <input
+            type="text"
+            id="city"
+            name="city"
+            value={address.city}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brandGreen"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
+            State
+          </label>
+          <input
+            type="text"
+            id="state"
+            name="state"
+            value={address.state}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brandGreen"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="postalCode" className="block text-sm font-medium text-gray-700 mb-1">
+            Postal Code
+          </label>
+          <input
+            type="text"
+            id="postalCode"
+            name="postalCode"
+            value={address.postalCode}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brandGreen"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-1">
+            Phone Number
+          </label>
+          <input
+            type="tel"
+            id="phoneNumber"
+            name="phoneNumber"
+            value={address.phoneNumber}
+            onChange={handleChange}
+            required
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-brandGreen"
+          />
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        className="w-full py-3 bg-brandGreen text-white font-medium rounded-md hover:opacity-90 transition-opacity"
+      >
+        Save Address
+      </button>
+    </form>
   );
 };
 

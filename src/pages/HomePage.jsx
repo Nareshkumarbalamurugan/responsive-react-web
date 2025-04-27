@@ -84,6 +84,7 @@ const HomePage = () => {
               src="https://images.unsplash.com/photo-1543168256-418811576931?w=800&auto=format&fit=crop"
               alt="Fresh groceries and vegetables" 
               className="w-full h-auto rounded-lg shadow-lg"
+              onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1584473457409-ce85152af916?w=800&auto=format&fit=crop"; }}
             />
           </div>
         </div>
@@ -157,6 +158,7 @@ const HomePage = () => {
                     src={product.image}
                     alt={product.name}
                     className="w-full h-52 object-cover"
+                    onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1584473457409-ce85152af916?w=800&auto=format&fit=crop"; }}
                   />
                 </Link>
                 <div className="p-4">

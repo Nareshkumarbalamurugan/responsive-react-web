@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { toast } from 'sonner';
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
+import SearchBar from '../components/SearchBar';
 
 // Mock product data with improved images
 const products = [
@@ -315,8 +315,8 @@ const ShopPage = () => {
     toast.success(`${product.name} added to cart!`);
   };
   
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
+  const handleClearSearch = () => {
+    setSearchTerm('');
   };
 
   return (
@@ -324,29 +324,13 @@ const ShopPage = () => {
       <div className="container mx-auto px-4 md:px-6">
         <h1 className="text-3xl md:text-4xl font-bold mb-6">Shop</h1>
         
-        {/* Mobile Search Bar */}
-        <div className="mb-6 md:hidden">
-          <form onSubmit={handleSearchSubmit} className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search products..."
-              className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md bg-white placeholder-gray-500 focus:outline-none focus:ring-brandGreen focus:border-brandGreen"
-            />
-            {searchTerm && (
-              <button
-                type="button"
-                onClick={() => setSearchTerm('')}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-              >
-                <X className="h-5 w-5 text-gray-400" />
-              </button>
-            )}
-          </form>
+        {/* Search Bar at the top */}
+        <div className="mb-6">
+          <SearchBar 
+            fullWidth
+            placeholder="Search products..." 
+            className="max-w-2xl mx-auto"
+          />
         </div>
         
         <div className="flex flex-col lg:flex-row gap-6">
@@ -368,23 +352,6 @@ const ShopPage = () => {
                     {category.label}
                   </button>
                 ))}
-              </div>
-              
-              {/* Desktop Search */}
-              <div className="mt-6 hidden md:block">
-                <h2 className="text-xl font-semibold mb-3">Search</h2>
-                <form onSubmit={handleSearchSubmit} className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-4 w-4 text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search products..."
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-white text-sm placeholder-gray-500 focus:outline-none focus:ring-brandGreen focus:border-brandGreen"
-                  />
-                </form>
               </div>
               
               <h2 className="text-xl font-semibold mt-6 mb-4">Sort By</h2>
@@ -433,7 +400,7 @@ const ShopPage = () => {
                   Showing results for: <span className="font-medium">"{searchTerm}"</span>
                 </p>
                 <button
-                  onClick={() => setSearchTerm('')}
+                  onClick={handleClearSearch}
                   className="text-sm text-brandGreen hover:underline"
                 >
                   Clear search
@@ -449,6 +416,7 @@ const ShopPage = () => {
                       src={product.image} 
                       alt={product.name} 
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1584473457409-ce85152af916?w=800&auto=format&fit=crop"; }}
                     />
                   </Link>
                   <div className="p-4 flex flex-col flex-grow">

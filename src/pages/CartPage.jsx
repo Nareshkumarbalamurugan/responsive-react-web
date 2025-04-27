@@ -1,344 +1,244 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
-import { useIsMobile } from '../hooks/use-mobile';
+import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
 import AddressForm from '../components/AddressForm';
-import PaymentOptions from '../components/PaymentOptions';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const CartPage = () => {
-  const { cartItems, updateQuantity, removeFromCart, clearCart } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart();
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
-  const [showAddressForm, setShowAddressForm] = useState(false);
-  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
-  const [address, setAddress] = useState(null);
-
-  // Use cartItems instead of cart for calculations
-  const cartTotal = cartItems.reduce((sum, item) => {
-    return sum + (item.offerPrice || item.price) * item.quantity;
-  }, 0);
-
-  const handleUpdateQuantity = (id, newQuantity) => {
-    if (newQuantity < 1) return;
-    updateQuantity(id, newQuantity);
-  };
-
-  const handleRemove = (id) => {
-    removeFromCart(id);
-    toast.success("Item removed from cart");
-  };
-
-  const handleContinueShopping = () => {
-    navigate('/shop');
-  };
+  const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
+  const [userAddress, setUserAddress] = useState(null);
   
-  const handleProceedToCheckout = () => {
-    if (cartItems.length === 0) {
-      toast.error("Your cart is empty");
+  // Calculate total price
+  const subtotal = cartItems?.reduce((total, item) => {
+    return total + (item.offerPrice || item.price) * item.quantity;
+  }, 0) || 0;
+  
+  const deliveryCharge = subtotal > 500 ? 0 : 50;
+  const tax = subtotal * 0.05; // 5% tax
+  const total = subtotal + deliveryCharge + tax;
+
+  // Load saved address from local storage
+  useEffect(() => {
+    if (currentUser) {
+      const savedAddress = localStorage.getItem(`userAddress_${currentUser.id}`);
+      if (savedAddress) {
+        setUserAddress(JSON.parse(savedAddress));
+      }
+    }
+  }, [currentUser]);
+
+  const handleQuantityChange = (id, newQuantity) => {
+    if (newQuantity >= 1) {
+      updateQuantity(id, newQuantity);
+    }
+  };
+
+  const handleRemoveItem = (item) => {
+    removeFromCart(item.id);
+    toast.success(`${item.name} removed from cart`);
+  };
+
+  const handleCheckout = () => {
+    if (!currentUser) {
+      toast.error('Please login to checkout');
+      navigate('/login', { state: { from: '/cart' }});
       return;
     }
-    setShowAddressForm(true);
-  };
-
-  const handleAddressSubmit = (addressData) => {
-    setAddress(addressData);
-    setShowAddressForm(false);
-    setShowPaymentOptions(true);
-    toast.success("Address saved");
-  };
-
-  const handlePaymentComplete = () => {
-    toast.success("Payment successful! Your order has been placed.");
+    
+    if (!userAddress) {
+      setIsAddressDialogOpen(true);
+      return;
+    }
+    
+    // Process checkout with the address
+    toast.success('Order placed successfully!');
     clearCart();
-    navigate('/orders');
+    navigate('/');
+  };
+  
+  const handleSaveAddress = (address) => {
+    setUserAddress(address);
+    // Save to local storage
+    if (currentUser) {
+      localStorage.setItem(`userAddress_${currentUser.id}`, JSON.stringify(address));
+    }
+    setIsAddressDialogOpen(false);
+    toast.success('Address saved successfully!');
   };
 
-  // Check cartItems.length instead of cart.length
-  if (cartItems.length === 0 && !showAddressForm && !showPaymentOptions) {
+  if (!cartItems || cartItems.length === 0) {
     return (
-      <div className="py-12">
-        <div className="container mx-auto px-6 text-center">
-          <h1 className="text-3xl font-bold mb-6">Your Cart</h1>
-          <div className="bg-white p-8 rounded-lg shadow-md max-w-md mx-auto">
-            <img
-              src="https://images.unsplash.com/photo-1586810724476-c294fb7ac01b?w=400&auto=format&fit=crop"
-              alt="Empty Cart"
-              className="w-48 h-48 object-cover mx-auto mb-6"
-            />
-            <h2 className="text-2xl font-medium mb-3">Your cart is empty</h2>
-            <p className="text-gray-600 mb-6">Looks like you haven't added any items to your cart yet.</p>
-            <button
-              className="bg-brandGreen text-white font-medium py-3 px-6 rounded-md hover:opacity-90 transition-opacity"
-              onClick={handleContinueShopping}
-            >
-              Continue Shopping
-            </button>
-          </div>
-        </div>
+      <div className="min-h-[70vh] flex flex-col items-center justify-center">
+        <img 
+          src="https://images.unsplash.com/photo-1612083476946-c6dd471f80e0?w=800&auto=format&fit=crop"
+          alt="Empty Cart" 
+          className="w-64 h-64 object-cover mb-8 rounded-full opacity-70"
+        />
+        <h2 className="text-2xl font-medium mb-2">Your cart is empty</h2>
+        <p className="text-gray-500 mb-6">Looks like you haven't added anything to your cart yet.</p>
+        <Link 
+          to="/shop" 
+          className="bg-brandGreen text-white px-8 py-3 rounded-md font-medium hover:opacity-90 transition-opacity"
+        >
+          Browse Products
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="py-8 md:py-12">
-      <div className="container mx-auto px-4 md:px-6">
-        <h1 className="text-3xl font-bold mb-6">Your Cart</h1>
+    <div className="py-8">
+      <div className="container mx-auto px-4">
+        <h1 className="text-2xl md:text-3xl font-bold mb-8">Your Shopping Cart</h1>
         
         <div className="flex flex-col lg:flex-row gap-8">
-          <div className={`${showPaymentOptions ? 'lg:w-1/2' : 'lg:w-2/3'}`}>
-            {!showAddressForm && !showPaymentOptions && (
-              <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                <table className={isMobile ? "hidden" : "w-full"}>
-                  <thead className="bg-gray-50 border-b">
-                    <tr>
-                      <th className="py-4 px-6 text-left text-gray-600">Product</th>
-                      <th className="py-4 px-4 text-left text-gray-600">Price</th>
-                      <th className="py-4 px-4 text-center text-gray-600">Quantity</th>
-                      <th className="py-4 px-4 text-right text-gray-600">Total</th>
-                      <th className="py-4 px-4 text-center text-gray-600">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {cartItems.map(item => (
-                      <tr key={item.id} className="border-b">
-                        <td className="py-4 px-6">
-                          <div className="flex items-center">
-                            <img
-                              src={item.image}
-                              alt={item.name}
-                              className="w-16 h-16 object-cover rounded-md mr-4"
-                            />
-                            <div>
-                              <h3 className="text-gray-800 font-medium">{item.name}</h3>
-                              {item.offerCode && (
-                                <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded">
-                                  {item.offerCode} applied
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <div>
-                            <span className="text-gray-800 font-medium">₹{(item.offerPrice || item.price).toFixed(2)}</span>
-                            {item.offerPrice && (
-                              <span className="block text-xs text-gray-500 line-through">₹{item.price.toFixed(2)}</span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <div className="flex items-center justify-center">
-                            <button
-                              onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                              className="px-2 py-1 border border-gray-300 rounded-l"
-                            >
-                              -
-                            </button>
-                            <span className="px-4 py-1 border-t border-b">
-                              {item.quantity}
-                            </span>
-                            <button
-                              onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                              className="px-2 py-1 border border-gray-300 rounded-r"
-                            >
-                              +
-                            </button>
-                          </div>
-                        </td>
-                        <td className="py-4 px-4 text-right">
-                          <span className="text-gray-800 font-medium">
-                            ₹{((item.offerPrice || item.price) * item.quantity).toFixed(2)}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4 text-center">
-                          <button
-                            onClick={() => handleRemove(item.id)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            Remove
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                
-                {/* Mobile Cart View */}
-                <div className={isMobile ? "divide-y" : "hidden"}>
-                  {cartItems.map(item => (
-                    <div key={item.id} className="p-4">
-                      <div className="flex gap-4 mb-3">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="w-20 h-20 object-cover rounded-md"
-                        />
-                        <div className="flex-grow">
-                          <h3 className="text-gray-800 font-medium">{item.name}</h3>
-                          {item.offerCode && (
-                            <span className="text-xs text-green-600 bg-green-50 px-1.5 py-0.5 rounded inline-block mt-1">
-                              {item.offerCode} applied
-                            </span>
+          {/* Cart Items */}
+          <div className="lg:w-2/3">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div className="divide-y divide-gray-200">
+                {cartItems.map(item => (
+                  <div key={item.id} className="p-4 md:p-6 flex flex-col md:flex-row gap-4">
+                    <Link to={`/product/${item.id}`} className="flex-shrink-0">
+                      <img 
+                        src={item.image} 
+                        alt={item.name}
+                        className="w-28 h-28 object-cover rounded-md"
+                        onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1584473457409-ce85152af916?w=800&auto=format&fit=crop"; }}
+                      />
+                    </Link>
+                    <div className="flex-grow">
+                      <Link to={`/product/${item.id}`} className="text-lg font-medium hover:text-brandGreen transition-colors">
+                        {item.name}
+                      </Link>
+                      {item.seller && (
+                        <p className="text-sm text-gray-500">Seller: {item.seller.name}</p>
+                      )}
+                      <div className="mt-2">
+                        <div className="flex items-center">
+                          {item.offerPrice ? (
+                            <>
+                              <span className="text-lg font-bold text-brandGreen">₹{(item.offerPrice * item.quantity).toFixed(2)}</span>
+                              <span className="text-sm text-gray-500 line-through ml-2">₹{(item.price * item.quantity).toFixed(2)}</span>
+                            </>
+                          ) : (
+                            <span className="text-lg font-bold">₹{(item.price * item.quantity).toFixed(2)}</span>
                           )}
-                          <div className="mt-1">
-                            <span className="text-gray-800 font-medium">₹{(item.offerPrice || item.price).toFixed(2)}</span>
-                            {item.offerPrice && (
-                              <span className="ml-1 text-xs text-gray-500 line-through">₹{item.price.toFixed(2)}</span>
-                            )}
-                          </div>
                         </div>
                       </div>
-                      
-                      <div className="flex justify-between items-center mt-3">
-                        <div className="flex items-center">
-                          <button
-                            onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-                            className="px-2 py-1 border border-gray-300 rounded-l"
+                      <div className="flex justify-between items-center mt-4">
+                        <div className="flex items-center border border-gray-300 rounded-md">
+                          <button 
+                            className="px-3 py-1 border-r border-gray-300 hover:bg-gray-100"
+                            onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                            disabled={item.quantity <= 1}
                           >
                             -
                           </button>
-                          <span className="px-3 py-1 border-t border-b">
-                            {item.quantity}
-                          </span>
-                          <button
-                            onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-                            className="px-2 py-1 border border-gray-300 rounded-r"
+                          <span className="px-3 py-1">{item.quantity}</span>
+                          <button 
+                            className="px-3 py-1 border-l border-gray-300 hover:bg-gray-100"
+                            onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                           >
                             +
                           </button>
                         </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">
-                            ₹{((item.offerPrice || item.price) * item.quantity).toFixed(2)}
-                          </span>
-                          <button
-                            onClick={() => handleRemove(item.id)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        </div>
+                        <button 
+                          className="text-red-500 hover:text-red-700 text-sm"
+                          onClick={() => handleRemoveItem(item)}
+                        >
+                          Remove
+                        </button>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            {showAddressForm && (
-              <AddressForm onAddressSubmit={handleAddressSubmit} />
-            )}
-            
-            {showPaymentOptions && (
-              <div>
-                <div className="bg-white rounded-lg shadow-md overflow-hidden p-6 mb-6">
-                  <h2 className="text-xl font-bold mb-4">Delivery Address</h2>
-                  <div className="border-l-4 border-brandGreen pl-4">
-                    <p className="font-medium">{address.fullName}</p>
-                    <p>{address.addressLine1}</p>
-                    {address.addressLine2 && <p>{address.addressLine2}</p>}
-                    <p>{address.city}, {address.state} - {address.pincode}</p>
-                    <p>Phone: {address.phone}</p>
                   </div>
-                  <button
-                    onClick={() => setShowAddressForm(true)}
-                    className="mt-4 text-sm text-brandBlue hover:underline"
-                  >
-                    Change address
-                  </button>
-                </div>
-                
-                <PaymentOptions
-                  total={cartTotal}
-                  onPaymentComplete={handlePaymentComplete}
-                />
+                ))}
               </div>
-            )}
-          </div>
-
-          <div className={`${showPaymentOptions ? 'lg:w-1/2' : 'lg:w-1/3'}`}>
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-bold mb-4">Order Summary</h2>
-              
-              <div className="space-y-3 mb-6">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal ({cartItems.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
-                  <span className="font-medium">₹{cartTotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Shipping</span>
-                  <span className="text-green-600">Free</span>
-                </div>
-                {cartTotal > 1000 && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Discount</span>
-                    <span className="text-green-600">- ₹50.00</span>
-                  </div>
-                )}
-                <div className="border-t pt-3 mt-3">
-                  <div className="flex justify-between font-bold">
-                    <span>Total</span>
-                    <span>₹{(cartTotal > 1000 ? cartTotal - 50 : cartTotal).toFixed(2)}</span>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">Inclusive of all taxes</p>
-                </div>
-              </div>
-              
-              {!showAddressForm && !showPaymentOptions && (
-                <div className="space-y-3">
-                  <button
-                    onClick={handleProceedToCheckout}
-                    className="w-full bg-brandGreen text-white py-3 rounded-md font-medium hover:opacity-90 transition-opacity"
-                  >
-                    Proceed to Checkout
-                  </button>
-                  <button
-                    onClick={handleContinueShopping}
-                    className="w-full bg-gray-100 text-gray-800 py-3 rounded-md font-medium hover:bg-gray-200 transition-colors"
-                  >
-                    Continue Shopping
-                  </button>
-                </div>
-              )}
-              
-              {showAddressForm && (
-                <div className="bg-gray-50 p-4 rounded-md">
-                  <h3 className="font-medium mb-2">Your Items:</h3>
-                  <ul className="space-y-2">
-                    {cartItems.map(item => (
-                      <li key={item.id} className="flex justify-between text-sm">
-                        <span>{item.name} × {item.quantity}</span>
-                        <span>₹{((item.offerPrice || item.price) * item.quantity).toFixed(2)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </div>
-            
-            {!showAddressForm && !showPaymentOptions && (
-              <div className="mt-6 bg-white rounded-lg shadow-md p-6">
-                <h3 className="font-medium mb-3">Have a promo code?</h3>
-                <div className="flex">
-                  <input
-                    type="text"
-                    placeholder="Enter code"
-                    className="flex-grow border border-gray-300 rounded-l-md px-4 py-2 focus:outline-none focus:ring-brandGreen focus:border-brandGreen"
-                  />
-                  <button className="bg-brandGreen text-white px-4 py-2 rounded-r-md hover:opacity-90 transition-opacity">
-                    Apply
-                  </button>
+          </div>
+          
+          {/* Order Summary */}
+          <div className="lg:w-1/3">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-24">
+              <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+              <div className="space-y-3 mb-4">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Subtotal ({cartItems.reduce((acc, item) => acc + item.quantity, 0)} items)</span>
+                  <span className="font-medium">₹{subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Delivery Charge</span>
+                  {deliveryCharge > 0 ? (
+                    <span className="font-medium">₹{deliveryCharge.toFixed(2)}</span>
+                  ) : (
+                    <span className="text-green-600">Free</span>
+                  )}
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Tax (5%)</span>
+                  <span className="font-medium">₹{tax.toFixed(2)}</span>
+                </div>
+                <div className="border-t border-gray-200 pt-3 mt-3">
+                  <div className="flex justify-between">
+                    <span className="font-semibold">Total</span>
+                    <span className="font-bold text-xl">₹{total.toFixed(2)}</span>
+                  </div>
                 </div>
               </div>
-            )}
+              
+              {/* Delivery Address */}
+              {userAddress && (
+                <div className="border-t border-gray-200 pt-4 mb-6">
+                  <h3 className="font-medium mb-2">Delivery Address</h3>
+                  <div className="bg-gray-50 p-3 rounded-md text-sm">
+                    <p className="font-medium">{userAddress.fullName}</p>
+                    <p>{userAddress.streetAddress}</p>
+                    <p>{userAddress.city}, {userAddress.state} {userAddress.postalCode}</p>
+                    <p>Phone: {userAddress.phoneNumber}</p>
+                    <button 
+                      className="text-brandGreen text-sm mt-2 hover:underline"
+                      onClick={() => setIsAddressDialogOpen(true)}
+                    >
+                      Change Address
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              <button 
+                className="w-full py-3 bg-brandGreen text-white font-medium rounded-md hover:opacity-90 transition-opacity"
+                onClick={handleCheckout}
+              >
+                {userAddress ? 'Place Order' : 'Continue to Delivery'}
+              </button>
+              
+              <div className="mt-6 text-center">
+                <Link to="/shop" className="text-brandGreen hover:underline">
+                  Continue Shopping
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+      
+      {/* Address Dialog */}
+      <Dialog open={isAddressDialogOpen} onOpenChange={setIsAddressDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delivery Address</DialogTitle>
+            <DialogDescription>
+              Enter your delivery address details below
+            </DialogDescription>
+          </DialogHeader>
+          <AddressForm onSave={handleSaveAddress} initialAddress={userAddress} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

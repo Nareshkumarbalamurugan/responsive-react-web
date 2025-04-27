@@ -11,7 +11,6 @@ const SearchBar = ({ className = "", placeholder = "Search products...", fullWid
     e.preventDefault();
     if (searchTerm.trim()) {
       navigate(`/shop?search=${encodeURIComponent(searchTerm.trim())}`);
-      setSearchTerm('');
     }
   };
 

@@ -26,7 +26,6 @@ import ReturnPolicyPage from "./pages/ReturnPolicyPage";
 import ProfilePage from "./pages/ProfilePage";
 import OrdersPage from "./pages/OrdersPage";
 import SellerDashboardPage from "./pages/SellerDashboardPage";
-import SearchBar from "./components/SearchBar";
 import ContactPage from "./pages/ContactPage";
 
 const queryClient = new QueryClient();
