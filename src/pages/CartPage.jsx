@@ -4,16 +4,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
-import AddressForm from '../components/AddressForm';
 import PaymentOptions from '../components/PaymentOptions';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useIsMobile } from '../hooks/use-mobile';
+import { Button } from '@/components/ui/button';
 
 const CartPage = () => {
   const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-  const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [userAddress, setUserAddress] = useState(null);
   const isMobile = useIsMobile();
@@ -60,7 +59,8 @@ const CartPage = () => {
     }
     
     if (!userAddress) {
-      setIsAddressDialogOpen(true);
+      // Navigate to the address page
+      navigate('/address', { state: { from: '/cart' }});
       return;
     }
     
@@ -73,16 +73,6 @@ const CartPage = () => {
     clearCart();
     setIsPaymentDialogOpen(false);
     navigate('/');
-  };
-  
-  const handleSaveAddress = (address) => {
-    setUserAddress(address);
-    // Save to local storage
-    if (currentUser) {
-      localStorage.setItem(`userAddress_${currentUser.id}`, JSON.stringify(address));
-    }
-    setIsAddressDialogOpen(false);
-    toast.success('Address saved successfully!');
   };
 
   if (!cartItems || cartItems.length === 0) {
@@ -213,22 +203,23 @@ const CartPage = () => {
                     <p>{userAddress.streetAddress}</p>
                     <p>{userAddress.city}, {userAddress.state} {userAddress.postalCode}</p>
                     <p>Phone: {userAddress.phoneNumber}</p>
-                    <button 
-                      className="text-brandGreen text-sm mt-2 hover:underline"
-                      onClick={() => setIsAddressDialogOpen(true)}
+                    <Button 
+                      variant="link"
+                      className="text-brandGreen p-0 mt-2 h-auto"
+                      onClick={() => navigate('/address', { state: { from: '/cart' }})}
                     >
                       Change Address
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
               
-              <button 
-                className="w-full py-3 bg-brandGreen text-white font-medium rounded-md hover:opacity-90 transition-opacity"
+              <Button 
+                className="w-full py-6 bg-brandGreen text-white font-medium rounded-md hover:opacity-90 transition-opacity"
                 onClick={handleCheckout}
               >
                 {!currentUser ? "Login to Checkout" : userAddress ? 'Proceed to Payment' : 'Add Delivery Address'}
-              </button>
+              </Button>
               
               <div className="mt-6 text-center">
                 <Link to="/shop" className="text-brandGreen hover:underline">
@@ -239,19 +230,6 @@ const CartPage = () => {
           </div>
         </div>
       </div>
-      
-      {/* Address Dialog - Make it full screen on mobile */}
-      <Dialog open={isAddressDialogOpen} onOpenChange={setIsAddressDialogOpen}>
-        <DialogContent className={isMobile ? "max-w-full w-full h-[100vh] p-4" : "sm:max-w-md"}>
-          <DialogHeader>
-            <DialogTitle>Delivery Address</DialogTitle>
-            <DialogDescription>
-              Enter your delivery address details below
-            </DialogDescription>
-          </DialogHeader>
-          <AddressForm onSave={handleSaveAddress} initialAddress={userAddress} />
-        </DialogContent>
-      </Dialog>
       
       {/* Payment Dialog - Make it full screen on mobile */}
       <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>

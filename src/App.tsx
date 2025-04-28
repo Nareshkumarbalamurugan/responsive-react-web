@@ -14,6 +14,7 @@ import ShopPage from "./pages/ShopPage";
 import CategoriesPage from "./pages/CategoriesPage";
 import AboutPage from "./pages/AboutPage";
 import CartPage from "./pages/CartPage";
+import AddressPage from "./pages/AddressPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
@@ -48,6 +49,7 @@ const App = () => (
                   <Route path="/categories/:categorySlug" element={<ShopPage />} />
                   <Route path="/about" element={<AboutPage />} />
                   <Route path="/cart" element={<CartPage />} />
+                  <Route path="/address" element={<AddressPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/product/:productId" element={<ProductDetailPage />} />
