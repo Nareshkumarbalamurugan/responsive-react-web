@@ -1,33 +1,23 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from 'sonner';
-import PaymentOptions from '../components/PaymentOptions';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useIsMobile } from '../hooks/use-mobile';
 import { Button } from '@/components/ui/button';
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { BadgePercent } from 'lucide-react';
 
 const CartPage = () => {
-  const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, applyCoupon } = useCart();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
   const [userAddress, setUserAddress] = useState(null);
-  const isMobile = useIsMobile();
   
-  // Calculate total price
-  const subtotal = cartItems?.reduce((total, item) => {
-    return total + (item.offerPrice || item.price) * item.quantity;
-  }, 0) || 0;
-  
-  const deliveryCharge = subtotal > 500 ? 0 : 50;
-  const tax = subtotal * 0.05; // 5% tax
-  const total = subtotal + deliveryCharge + tax;
-
-  // Load saved address from local storage
-  useEffect(() => {
+  // Load saved address from localStorage
+  React.useEffect(() => {
     if (currentUser) {
       const savedAddress = localStorage.getItem(`userAddress_${currentUser.id}`);
       if (savedAddress) {
@@ -39,6 +29,15 @@ const CartPage = () => {
       }
     }
   }, [currentUser]);
+  
+  // Calculate total price
+  const subtotal = cartItems?.reduce((total, item) => {
+    return total + (item.offerPrice || item.price) * item.quantity;
+  }, 0) || 0;
+  
+  const deliveryCharge = subtotal > 500 ? 0 : 50;
+  const tax = subtotal * 0.05; // 5% tax
+  const total = subtotal + deliveryCharge + tax;
 
   const handleQuantityChange = (id, newQuantity) => {
     if (newQuantity >= 1) {
@@ -51,7 +50,22 @@ const CartPage = () => {
     toast.success(`${item.name} removed from cart`);
   };
 
-  const handleCheckout = () => {
+  const handleApplyCoupon = () => {
+    if (!couponCode.trim()) {
+      toast.error('Please enter a coupon code');
+      return;
+    }
+    
+    const success = applyCoupon(couponCode.trim().toUpperCase());
+    if (success) {
+      toast.success('Coupon applied successfully!');
+      setCouponCode('');
+    } else {
+      toast.error('Invalid coupon code');
+    }
+  };
+
+  const handleProceedToCheckout = () => {
     if (!currentUser) {
       toast.error('Please login to checkout');
       navigate('/login', { state: { from: '/cart' }});
@@ -59,20 +73,11 @@ const CartPage = () => {
     }
     
     if (!userAddress) {
-      // Navigate to the address page
       navigate('/address', { state: { from: '/cart' }});
       return;
     }
     
-    // Show payment options
-    setIsPaymentDialogOpen(true);
-  };
-  
-  const handlePaymentComplete = () => {
-    toast.success('Order placed successfully!');
-    clearCart();
-    setIsPaymentDialogOpen(false);
-    navigate('/');
+    navigate('/payment', { state: { from: '/cart' }});
   };
 
   if (!cartItems || cartItems.length === 0) {
@@ -168,7 +173,33 @@ const CartPage = () => {
           {/* Order Summary */}
           <div className="lg:w-1/3 w-full mt-6 lg:mt-0">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-24">
-              <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+              {/* Offers Section */}
+              <Card className="mb-6 p-4 bg-gray-50">
+                <div className="flex items-center gap-2 mb-4">
+                  <BadgePercent className="text-brandGreen" />
+                  <h3 className="font-semibold">Available Offers</h3>
+                </div>
+                <ul className="text-sm space-y-2">
+                  <li>• Use code WELCOME10 for 10% off your first order</li>
+                  <li>• Free delivery on orders above ₹500</li>
+                  <li>• Use FLAT100 for ₹100 off on orders above ₹1000</li>
+                  <li>• Use SUMMER20 for 20% off on summer collection</li>
+                </ul>
+              </Card>
+
+              {/* Coupon Input */}
+              <div className="flex gap-2 mb-6">
+                <Input
+                  type="text"
+                  placeholder="Enter coupon code"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  className="flex-grow"
+                />
+                <Button onClick={handleApplyCoupon}>Apply</Button>
+              </div>
+
+              {/* Price Summary */}
               <div className="space-y-3 mb-4">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal ({cartItems.reduce((acc, item) => acc + item.quantity, 0)} items)</span>
@@ -216,7 +247,7 @@ const CartPage = () => {
               
               <Button 
                 className="w-full py-6 bg-brandGreen text-white font-medium rounded-md hover:opacity-90 transition-opacity"
-                onClick={handleCheckout}
+                onClick={handleProceedToCheckout}
               >
                 {!currentUser ? "Login to Checkout" : userAddress ? 'Proceed to Payment' : 'Add Delivery Address'}
               </Button>
@@ -230,19 +261,6 @@ const CartPage = () => {
           </div>
         </div>
       </div>
-      
-      {/* Payment Dialog - Make it full screen on mobile */}
-      <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
-        <DialogContent className={isMobile ? "max-w-full w-full h-[100vh] p-4" : "sm:max-w-md"}>
-          <DialogHeader>
-            <DialogTitle>Payment</DialogTitle>
-            <DialogDescription>
-              Choose your payment method
-            </DialogDescription>
-          </DialogHeader>
-          <PaymentOptions total={total} onPaymentComplete={handlePaymentComplete} />
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
