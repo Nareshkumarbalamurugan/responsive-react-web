@@ -104,6 +104,7 @@ const HomePage = () => {
                   src="https://images.unsplash.com/photo-1519996529931-28324d5a630e?w=800&auto=format&fit=crop" 
                   alt="Fruits and Vegetables" 
                   className="w-full h-full object-cover"
+                  onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=800&auto=format&fit=crop"; }}
                 />
               </div>
               <h3 className="text-base sm:text-xl font-medium">Fruits & Vegetables</h3>
@@ -116,6 +117,7 @@ const HomePage = () => {
                   src="https://images.unsplash.com/photo-1595981267035-7b04ca84a82d?w=800&auto=format&fit=crop" 
                   alt="Beverages" 
                   className="w-full h-full object-cover"
+                  onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1527156231393-7023794f363c?w=800&auto=format&fit=crop"; }}
                 />
               </div>
               <h3 className="text-base sm:text-xl font-medium">Beverages</h3>
@@ -128,6 +130,7 @@ const HomePage = () => {
                   src="https://images.unsplash.com/photo-1628088062854-d1870b4553da?w=800&auto=format&fit=crop" 
                   alt="Dairy Products" 
                   className="w-full h-full object-cover"
+                  onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=800&auto=format&fit=crop"; }}
                 />
               </div>
               <h3 className="text-base sm:text-xl font-medium">Dairy Products</h3>
@@ -140,6 +143,7 @@ const HomePage = () => {
                   src="https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=800&auto=format&fit=crop" 
                   alt="Bakery & Snacks" 
                   className="w-full h-full object-cover"
+                  onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=800&auto=format&fit=crop"; }}
                 />
               </div>
               <h3 className="text-base sm:text-xl font-medium">Bakery & Snacks</h3>

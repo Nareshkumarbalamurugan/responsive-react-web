@@ -65,13 +65,14 @@ const ProfilePage = () => {
             <div className="bg-gradient-to-r from-blue-500 to-teal-400 p-6 text-white">
               <div className="flex flex-col sm:flex-row items-center">
                 <img
-                  src={currentUser.profile?.avatar || `https://ui-avatars.com/api/?name=${currentUser.name}&background=random`}
+                  src={currentUser.profile?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=random`}
                   alt={currentUser.name}
                   className="w-24 h-24 rounded-full border-4 border-white object-cover"
+                  onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=800&auto=format&fit=crop"; }}
                 />
                 <div className="mt-4 sm:mt-0 sm:ml-6 text-center sm:text-left">
                   <h2 className="text-2xl font-bold">{currentUser.name}</h2>
-                  <p className="text-white text-opacity-90">{currentUser.email}</p>
+                  <p className="text-white text-opacity-90 break-all">{currentUser.email}</p>
                   <p className="mt-1 bg-white bg-opacity-20 inline-block px-3 py-1 rounded-full text-sm capitalize">
                     {userType} Account
                   </p>
@@ -105,7 +106,7 @@ const ProfilePage = () => {
                         value={profileData.email}
                         onChange={handleInputChange}
                         disabled
-                        className="w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-100 cursor-not-allowed"
+                        className="w-full border border-gray-300 rounded-md px-4 py-2 bg-gray-100 cursor-not-allowed truncate"
                       />
                       <p className="text-gray-500 text-sm mt-1">Email cannot be changed</p>
                     </div>
@@ -177,7 +178,7 @@ const ProfilePage = () => {
                     
                     <div>
                       <h3 className="text-gray-500 text-sm">Email</h3>
-                      <p className="font-medium">{currentUser.email}</p>
+                      <p className="font-medium break-words">{currentUser.email}</p>
                     </div>
                     
                     <div>
@@ -248,7 +249,7 @@ const ProfilePage = () => {
                 <div>
                   <h3 className="font-medium">Last Login</h3>
                   <p className="text-gray-600 text-sm">
-                    {new Date(currentUser.profile?.lastLogin).toLocaleDateString('en-IN', {
+                    {new Date(currentUser.profile?.lastLogin || new Date()).toLocaleDateString('en-IN', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
@@ -268,7 +269,10 @@ const ProfilePage = () => {
                     <h3 className="font-medium">Orders Placed</h3>
                     <p className="text-gray-600 text-sm">View your purchase history</p>
                   </div>
-                  <button className="bg-blue-100 text-blue-800 px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-200 transition-colors">
+                  <button 
+                    onClick={() => navigate('/orders')}
+                    className="bg-blue-100 text-blue-800 px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-200 transition-colors"
+                  >
                     View Orders
                   </button>
                 </div>
@@ -278,7 +282,10 @@ const ProfilePage = () => {
                     <h3 className="font-medium">Seller Dashboard</h3>
                     <p className="text-gray-600 text-sm">Manage your products and orders</p>
                   </div>
-                  <button className="bg-blue-100 text-blue-800 px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-200 transition-colors">
+                  <button 
+                    onClick={() => navigate('/seller-dashboard')}
+                    className="bg-blue-100 text-blue-800 px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-200 transition-colors"
+                  >
                     Dashboard
                   </button>
                 </div>
