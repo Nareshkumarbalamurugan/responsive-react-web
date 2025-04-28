@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
+import SearchBar from '../components/SearchBar';
 
 const categories = [
   {
@@ -79,33 +80,28 @@ const CategoriesPage = () => {
   };
 
   return (
-    <div className="py-12">
-      <div className="container mx-auto px-4 md:px-6">
+    <div className="py-8 px-4 sm:py-12">
+      <div className="container mx-auto">
         <h1 className="text-4xl font-bold mb-6 text-center">Categories</h1>
         
         {/* Search Bar */}
-        <div className="relative max-w-md mx-auto mb-8">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
-          </div>
-          <input
-            type="text"
-            placeholder="Search categories..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-brandGreen focus:border-brandGreen transition duration-150 ease-in-out sm:text-sm"
+        <div className="max-w-md mx-auto mb-8">
+          <SearchBar 
+            placeholder="Search categories..." 
+            fullWidth={true}
+            className="w-full"
           />
         </div>
         
         {filteredCategories.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {filteredCategories.map(category => (
               <div 
                 key={category.id}
                 onClick={() => handleCategoryClick(category.slug)}
                 className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer"
               >
-                <div className="h-48 overflow-hidden">
+                <div className="h-40 sm:h-48 overflow-hidden">
                   <img 
                     src={category.image} 
                     alt={category.name} 
@@ -115,7 +111,7 @@ const CategoriesPage = () => {
                 </div>
                 <div className="p-4">
                   <h3 className="text-xl font-medium text-gray-900 group-hover:text-brandGreen transition-colors">{category.name}</h3>
-                  <p className="mt-2 text-sm text-gray-600">{category.description}</p>
+                  <p className="mt-2 text-sm text-gray-600 line-clamp-2">{category.description}</p>
                 </div>
               </div>
             ))}

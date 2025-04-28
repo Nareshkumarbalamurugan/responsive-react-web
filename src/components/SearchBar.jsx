@@ -19,7 +19,10 @@ const SearchBar = ({ className = "", placeholder = "Search products...", fullWid
   };
 
   return (
-    <form onSubmit={handleSearch} className={`relative ${fullWidth ? 'w-full' : isMobile ? 'w-full' : ''} ${className}`}>
+    <form 
+      onSubmit={handleSearch} 
+      className={`relative ${fullWidth || isMobile ? 'w-full' : 'w-auto'} ${className}`}
+    >
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <Search className="h-5 w-5 text-gray-400" />
       </div>
@@ -42,6 +45,7 @@ const SearchBar = ({ className = "", placeholder = "Search products...", fullWid
       <button
         type="submit"
         className="absolute inset-y-0 right-0 px-3 flex items-center bg-brandGreen text-white rounded-r-md hover:bg-opacity-90 transition-opacity"
+        aria-label="Search"
       >
         {isMobile ? <Search className="h-4 w-4" /> : "Search"}
       </button>

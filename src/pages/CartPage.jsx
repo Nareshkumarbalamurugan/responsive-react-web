@@ -32,7 +32,11 @@ const CartPage = () => {
     if (currentUser) {
       const savedAddress = localStorage.getItem(`userAddress_${currentUser.id}`);
       if (savedAddress) {
-        setUserAddress(JSON.parse(savedAddress));
+        try {
+          setUserAddress(JSON.parse(savedAddress));
+        } catch (error) {
+          console.error("Failed to parse saved address:", error);
+        }
       }
     }
   }, [currentUser]);
@@ -83,14 +87,14 @@ const CartPage = () => {
 
   if (!cartItems || cartItems.length === 0) {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center">
+      <div className="min-h-[70vh] flex flex-col items-center justify-center px-4">
         <img 
           src="https://images.unsplash.com/photo-1612083476946-c6dd471f80e0?w=800&auto=format&fit=crop"
           alt="Empty Cart" 
           className="w-64 h-64 object-cover mb-8 rounded-full opacity-70"
         />
-        <h2 className="text-2xl font-medium mb-2">Your cart is empty</h2>
-        <p className="text-gray-500 mb-6">Looks like you haven't added anything to your cart yet.</p>
+        <h2 className="text-2xl font-medium mb-2 text-center">Your cart is empty</h2>
+        <p className="text-gray-500 mb-6 text-center">Looks like you haven't added anything to your cart yet.</p>
         <Link 
           to="/shop" 
           className="bg-brandGreen text-white px-8 py-3 rounded-md font-medium hover:opacity-90 transition-opacity"
@@ -113,7 +117,7 @@ const CartPage = () => {
               <div className="divide-y divide-gray-200">
                 {cartItems.map(item => (
                   <div key={item.id} className="p-4 md:p-6 flex flex-col md:flex-row gap-4">
-                    <Link to={`/product/${item.id}`} className="flex-shrink-0">
+                    <Link to={`/product/${item.id}`} className="flex-shrink-0 mx-auto md:mx-0">
                       <img 
                         src={item.image} 
                         alt={item.name}
@@ -122,14 +126,14 @@ const CartPage = () => {
                       />
                     </Link>
                     <div className="flex-grow">
-                      <Link to={`/product/${item.id}`} className="text-lg font-medium hover:text-brandGreen transition-colors">
+                      <Link to={`/product/${item.id}`} className="text-lg font-medium hover:text-brandGreen transition-colors block text-center md:text-left">
                         {item.name}
                       </Link>
                       {item.seller && (
-                        <p className="text-sm text-gray-500">Seller: {item.seller.name}</p>
+                        <p className="text-sm text-gray-500 text-center md:text-left">Seller: {item.seller.name}</p>
                       )}
                       <div className="mt-2">
-                        <div className="flex items-center">
+                        <div className="flex items-center justify-center md:justify-start">
                           {item.offerPrice ? (
                             <>
                               <span className="text-lg font-bold text-brandGreen">₹{(item.offerPrice * item.quantity).toFixed(2)}</span>
@@ -140,7 +144,7 @@ const CartPage = () => {
                           )}
                         </div>
                       </div>
-                      <div className="flex justify-between items-center mt-4">
+                      <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-3">
                         <div className="flex items-center border border-gray-300 rounded-md">
                           <button 
                             className="px-3 py-1 border-r border-gray-300 hover:bg-gray-100"
@@ -172,7 +176,7 @@ const CartPage = () => {
           </div>
           
           {/* Order Summary */}
-          <div className="lg:w-1/3 w-full">
+          <div className="lg:w-1/3 w-full mt-6 lg:mt-0">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-24">
               <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
               <div className="space-y-3 mb-4">
@@ -238,7 +242,7 @@ const CartPage = () => {
       
       {/* Address Dialog - Make it full screen on mobile */}
       <Dialog open={isAddressDialogOpen} onOpenChange={setIsAddressDialogOpen}>
-        <DialogContent className={`${isMobile ? 'sm:max-w-[100%] w-[100%] h-[100vh]' : 'sm:max-w-md'}`}>
+        <DialogContent className={isMobile ? "max-w-full w-full h-[100vh] p-4" : "sm:max-w-md"}>
           <DialogHeader>
             <DialogTitle>Delivery Address</DialogTitle>
             <DialogDescription>
@@ -251,7 +255,7 @@ const CartPage = () => {
       
       {/* Payment Dialog - Make it full screen on mobile */}
       <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
-        <DialogContent className={`${isMobile ? 'sm:max-w-[100%] w-[100%] h-[100vh]' : 'sm:max-w-md'}`}>
+        <DialogContent className={isMobile ? "max-w-full w-full h-[100vh] p-4" : "sm:max-w-md"}>
           <DialogHeader>
             <DialogTitle>Payment</DialogTitle>
             <DialogDescription>
