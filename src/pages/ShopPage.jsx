@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { toast } from 'sonner';
 import { Search, X } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
+import { useIsMobile } from '../hooks/use-mobile';
 
 // Mock product data with improved images
 const products = [
@@ -255,6 +256,8 @@ const ShopPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { addToCart } = useCart();
   const location = useLocation();
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
   // Parse query parameters
   useEffect(() => {
@@ -307,7 +310,10 @@ const ShopPage = () => {
     { value: 'dairy', label: 'Dairy Products' },
     { value: 'bakery', label: 'Bakery & Snacks' },
     { value: 'beverages', label: 'Beverages' },
-    { value: 'pantry', label: 'Pantry Items' }
+    { value: 'pantry', label: 'Pantry Items' },
+    { value: 'meat-seafood', label: 'Meat & Seafood' },
+    { value: 'frozen', label: 'Frozen Foods' },
+    { value: 'personal-care', label: 'Personal Care' }
   ];
 
   const handleAddToCart = (product) => {
@@ -317,6 +323,22 @@ const ShopPage = () => {
   
   const handleClearSearch = () => {
     setSearchTerm('');
+    const params = new URLSearchParams(location.search);
+    params.delete('search');
+    navigate({ search: params.toString() });
+  };
+  
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+    const params = new URLSearchParams(location.search);
+    
+    if (category === 'all') {
+      params.delete('category');
+    } else {
+      params.set('category', category);
+    }
+    
+    navigate({ search: params.toString() });
   };
 
   return (
@@ -329,16 +351,16 @@ const ShopPage = () => {
           <SearchBar 
             fullWidth
             placeholder="Search products..." 
-            className="max-w-2xl mx-auto"
+            className="max-w-full md:max-w-2xl mx-auto"
           />
         </div>
         
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* Category Filter */}
-          <div className="lg:w-1/4">
+          {/* Category Filter - Toggle for mobile */}
+          <div className={`${isMobile ? 'w-full' : 'lg:w-1/4'}`}>
             <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-200 sticky top-24">
               <h2 className="text-xl font-semibold mb-4">Categories</h2>
-              <div className="space-y-2">
+              <div className={`space-y-2 ${isMobile ? 'grid grid-cols-2 gap-2 space-y-0' : ''}`}>
                 {categories.map(category => (
                   <button
                     key={category.value}
@@ -347,7 +369,7 @@ const ShopPage = () => {
                         ? 'bg-brandGreen text-white'
                         : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                     }`}
-                    onClick={() => setSelectedCategory(category.value)}
+                    onClick={() => handleCategoryChange(category.value)}
                   >
                     {category.label}
                   </button>
@@ -355,7 +377,7 @@ const ShopPage = () => {
               </div>
               
               <h2 className="text-xl font-semibold mt-6 mb-4">Sort By</h2>
-              <div className="space-y-2">
+              <div className={`space-y-2 ${isMobile ? 'grid grid-cols-2 gap-2 space-y-0' : ''}`}>
                 <button
                   className={`w-full text-left px-4 py-2 rounded-md ${
                     sortBy === 'recommended' ? 'bg-brandGreen text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
@@ -393,7 +415,7 @@ const ShopPage = () => {
           </div>
           
           {/* Product Grid */}
-          <div className="lg:w-3/4">
+          <div className={`${isMobile ? 'w-full' : 'lg:w-3/4'}`}>
             {searchTerm && (
               <div className="mb-4 flex items-center justify-between bg-gray-50 p-3 rounded-md">
                 <p>
@@ -426,7 +448,7 @@ const ShopPage = () => {
                     <div className="flex justify-between items-center mb-3">
                       <div>
                         {product.offerPrice ? (
-                          <div className="flex items-center">
+                          <div className="flex flex-wrap items-center">
                             <span className="text-lg font-bold text-brandGreen">₹{product.offerPrice.toFixed(2)}</span>
                             <span className="text-sm text-gray-500 line-through ml-2">₹{product.price.toFixed(2)}</span>
                             <span className="ml-2 text-xs px-1.5 py-0.5 bg-green-100 text-green-800 rounded">
@@ -487,6 +509,7 @@ const ShopPage = () => {
                   onClick={() => {
                     setSelectedCategory('all');
                     setSearchTerm('');
+                    navigate('/shop');
                   }}
                 >
                   Show All Products

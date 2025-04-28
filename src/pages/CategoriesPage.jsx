@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { useIsMobile } from '../hooks/use-mobile';
 
@@ -66,15 +66,21 @@ const categories = [
 const CategoriesPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   
   const filteredCategories = categories.filter(category => 
     category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     category.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
+  const handleCategoryClick = (slug) => {
+    // Navigate to shop page with category filter
+    navigate(`/shop?category=${slug}`);
+  };
 
   return (
     <div className="py-12">
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-4 md:px-6">
         <h1 className="text-4xl font-bold mb-6 text-center">Categories</h1>
         
         {/* Search Bar */}
@@ -94,23 +100,24 @@ const CategoriesPage = () => {
         {filteredCategories.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredCategories.map(category => (
-              <Link 
-                to={`/categories/${category.slug}`}
+              <div 
                 key={category.id}
-                className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300"
+                onClick={() => handleCategoryClick(category.slug)}
+                className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer"
               >
                 <div className="h-48 overflow-hidden">
                   <img 
                     src={category.image} 
                     alt={category.name} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1584473457409-ce85152af916?w=800&auto=format&fit=crop"; }}
                   />
                 </div>
                 <div className="p-4">
                   <h3 className="text-xl font-medium text-gray-900 group-hover:text-brandGreen transition-colors">{category.name}</h3>
                   <p className="mt-2 text-sm text-gray-600">{category.description}</p>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         ) : (

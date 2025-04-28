@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
@@ -6,6 +7,7 @@ import { toast } from 'sonner';
 import AddressForm from '../components/AddressForm';
 import PaymentOptions from '../components/PaymentOptions';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useIsMobile } from '../hooks/use-mobile';
 
 const CartPage = () => {
   const { cartItems, removeFromCart, updateQuantity, clearCart } = useCart();
@@ -14,6 +16,7 @@ const CartPage = () => {
   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false);
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [userAddress, setUserAddress] = useState(null);
+  const isMobile = useIsMobile();
   
   // Calculate total price
   const subtotal = cartItems?.reduce((total, item) => {
@@ -105,7 +108,7 @@ const CartPage = () => {
         
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Cart Items */}
-          <div className="lg:w-2/3">
+          <div className="lg:w-2/3 w-full">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
               <div className="divide-y divide-gray-200">
                 {cartItems.map(item => (
@@ -169,7 +172,7 @@ const CartPage = () => {
           </div>
           
           {/* Order Summary */}
-          <div className="lg:w-1/3">
+          <div className="lg:w-1/3 w-full">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-24">
               <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
               <div className="space-y-3 mb-4">
@@ -233,9 +236,9 @@ const CartPage = () => {
         </div>
       </div>
       
-      {/* Address Dialog */}
+      {/* Address Dialog - Make it full screen on mobile */}
       <Dialog open={isAddressDialogOpen} onOpenChange={setIsAddressDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className={`${isMobile ? 'sm:max-w-[100%] w-[100%] h-[100vh]' : 'sm:max-w-md'}`}>
           <DialogHeader>
             <DialogTitle>Delivery Address</DialogTitle>
             <DialogDescription>
@@ -246,9 +249,9 @@ const CartPage = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Payment Dialog */}
+      {/* Payment Dialog - Make it full screen on mobile */}
       <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className={`${isMobile ? 'sm:max-w-[100%] w-[100%] h-[100vh]' : 'sm:max-w-md'}`}>
           <DialogHeader>
             <DialogTitle>Payment</DialogTitle>
             <DialogDescription>
