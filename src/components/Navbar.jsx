@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ShoppingCart, Menu, X, User, LogIn } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
@@ -13,6 +13,8 @@ const Navbar = () => {
   const { currentUser, logout, userType } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
+  const profileMenuRef = useRef(null);
+  const profileButtonRef = useRef(null);
   
   useEffect(() => {
     const handleScroll = () => {
@@ -24,6 +26,25 @@ const Navbar = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+  
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        isProfileMenuOpen && 
+        profileMenuRef.current && 
+        profileButtonRef.current &&
+        !profileMenuRef.current.contains(event.target) && 
+        !profileButtonRef.current.contains(event.target)
+      ) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isProfileMenuOpen]);
   
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -97,6 +118,7 @@ const Navbar = () => {
           {/* User Profile Menu */}
           <div className="relative">
             <button 
+              ref={profileButtonRef}
               onClick={toggleProfileMenu}
               className="flex items-center space-x-2 text-lg hover:text-brandGreen transition-colors p-2 rounded-full hover:bg-gray-100"
               aria-label={currentUser ? "User profile" : "Login"}
@@ -109,12 +131,15 @@ const Navbar = () => {
             </button>
             
             {isProfileMenuOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+              <div 
+                ref={profileMenuRef}
+                className="absolute right-0 mt-2 w-64 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200"
+              >
                 {currentUser ? (
                   <>
                     <div className="px-4 py-3 border-b border-gray-200">
                       <p className="font-medium">{currentUser.name}</p>
-                      <p className="text-sm text-gray-500">{currentUser.email}</p>
+                      <p className="text-sm text-gray-500 break-words">{currentUser.email}</p>
                       <p className="text-xs text-gray-400 mt-1 capitalize">{userType} Account</p>
                     </div>
                     <Link 
