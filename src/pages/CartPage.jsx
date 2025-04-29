@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/card";
 import { BadgePercent } from 'lucide-react';
 
 const CartPage = () => {
-  const { cartItems, removeFromCart, updateQuantity, applyCoupon } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, applyCoupon, totalPrice } = useCart();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [couponCode, setCouponCode] = useState('');
@@ -96,6 +96,9 @@ const CartPage = () => {
           src="https://images.unsplash.com/photo-1612083476946-c6dd471f80e0?w=800&auto=format&fit=crop"
           alt="Empty Cart" 
           className="w-64 h-64 object-cover mb-8 rounded-full opacity-70"
+          onError={(e) => {
+            e.target.src = "https://images.unsplash.com/photo-1584473457409-ce85152af916?w=800&auto=format&fit=crop";
+          }}
         />
         <h2 className="text-2xl font-medium mb-2 text-center">Your cart is empty</h2>
         <p className="text-gray-500 mb-6 text-center">Looks like you haven't added anything to your cart yet.</p>

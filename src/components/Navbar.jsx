@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ShoppingCart, Menu, X, User, LogIn } from 'lucide-react';
@@ -45,6 +44,12 @@ const Navbar = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isProfileMenuOpen]);
+
+  // Close menu when route changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+    setIsProfileMenuOpen(false);
+  }, [location]);
   
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -61,6 +66,7 @@ const Navbar = () => {
     setIsProfileMenuOpen(false);
   };
 
+  
   return (
     <nav className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md py-2' : 'bg-white border-b border-gray-200 py-4'} px-4 md:px-6`}>
       <div className="container mx-auto flex justify-between items-center">
