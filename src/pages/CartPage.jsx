@@ -65,6 +65,15 @@ const CartPage = () => {
     }
   };
 
+  const handleApplyOffer = (offerCode) => {
+    const success = applyCoupon(offerCode);
+    if (success) {
+      toast.success(`Offer code ${offerCode} applied successfully!`);
+    } else {
+      toast.error('Unable to apply offer');
+    }
+  };
+
   const handleProceedToCheckout = () => {
     if (!currentUser) {
       toast.error('Please login to checkout');
@@ -180,10 +189,49 @@ const CartPage = () => {
                   <h3 className="font-semibold">Available Offers</h3>
                 </div>
                 <ul className="text-sm space-y-2">
-                  <li>• Use code WELCOME10 for 10% off your first order</li>
-                  <li>• Free delivery on orders above ₹500</li>
-                  <li>• Use FLAT100 for ₹100 off on orders above ₹1000</li>
-                  <li>• Use SUMMER20 for 20% off on summer collection</li>
+                  <li className="flex justify-between items-center">
+                    <span>• Use code WELCOME10 for 10% off your first order</span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-brandGreen"
+                      onClick={() => handleApplyOffer('WELCOME10')}
+                    >
+                      Apply
+                    </Button>
+                  </li>
+                  <li>
+                    <span>• Free delivery on orders above ₹500</span>
+                    {subtotal < 500 && (
+                      <span className="text-xs text-gray-500 block mt-1">
+                        Add ₹{(500 - subtotal).toFixed(2)} more to get free delivery
+                      </span>
+                    )}
+                  </li>
+                  <li className="flex justify-between items-center">
+                    <span>• Use FLAT100 for ₹100 off on orders above ₹1000</span>
+                    {subtotal >= 1000 && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-brandGreen"
+                        onClick={() => handleApplyOffer('FLAT100')}
+                      >
+                        Apply
+                      </Button>
+                    )}
+                  </li>
+                  <li className="flex justify-between items-center">
+                    <span>• Use SUMMER20 for 20% off on summer collection</span>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-brandGreen"
+                      onClick={() => handleApplyOffer('SUMMER20')}
+                    >
+                      Apply
+                    </Button>
+                  </li>
                 </ul>
               </Card>
 
