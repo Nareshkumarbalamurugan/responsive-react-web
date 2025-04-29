@@ -10,8 +10,26 @@ import { toast } from 'sonner';
 const PaymentPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { totalPrice, clearCart } = useCart();
+  const { totalPrice, clearCart, cartItems, appliedCoupon } = useCart();
   const returnTo = location.state?.from || '/cart';
+
+  // Calculate the order subtotal without discounts
+  const subtotal = cartItems?.reduce((total, item) => {
+    return total + (item.offerPrice || item.price) * item.quantity;
+  }, 0) || 0;
+  
+  // Calculate discount amount if a coupon is applied
+  let discountAmount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.type === 'percentage') {
+      discountAmount = subtotal * appliedCoupon.discount;
+    } else if (appliedCoupon.type === 'fixed') {
+      discountAmount = appliedCoupon.discount;
+    }
+  }
+  
+  const deliveryCharge = subtotal > 500 ? 0 : 50;
+  const tax = (subtotal - discountAmount) * 0.05; // 5% tax on discounted amount
 
   const handlePaymentComplete = () => {
     toast.success('Order placed successfully!');
@@ -35,8 +53,42 @@ const PaymentPage = () => {
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-2">Order Total</h2>
-            <p className="text-2xl font-bold text-brandGreen">₹{totalPrice.toFixed(2)}</p>
+            <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Subtotal</span>
+                <span>₹{subtotal.toFixed(2)}</span>
+              </div>
+              
+              {discountAmount > 0 && (
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>Discount {appliedCoupon.code}</span>
+                  <span>-₹{discountAmount.toFixed(2)}</span>
+                </div>
+              )}
+              
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Delivery Charge</span>
+                {deliveryCharge > 0 ? (
+                  <span>₹{deliveryCharge.toFixed(2)}</span>
+                ) : (
+                  <span className="text-green-600">Free</span>
+                )}
+              </div>
+              
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Tax (5%)</span>
+                <span>₹{tax.toFixed(2)}</span>
+              </div>
+              
+              <div className="border-t border-gray-200 pt-2 mt-2">
+                <div className="flex justify-between font-medium">
+                  <span>Total</span>
+                  <span className="text-xl font-bold text-brandGreen">₹{totalPrice.toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
           </div>
           
           <PaymentOptions 

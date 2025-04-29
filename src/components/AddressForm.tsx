@@ -3,8 +3,6 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Form, FormField, FormItem, FormControl, FormLabel } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
 
 interface AddressFormProps {
   onSave: (address: AddressData) => void;
@@ -62,6 +60,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
           onChange={handleChange}
           required
           className="w-full"
+          placeholder="Enter your full name"
         />
       </div>
 
@@ -77,6 +76,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
           onChange={handleChange}
           required
           className="w-full"
+          placeholder="Enter your street address"
         />
       </div>
 
@@ -93,6 +93,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
             onChange={handleChange}
             required
             className="w-full"
+            placeholder="Enter your city"
           />
         </div>
 
@@ -108,6 +109,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
             onChange={handleChange}
             required
             className="w-full"
+            placeholder="Enter your state"
           />
         </div>
       </div>
@@ -125,6 +127,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
             onChange={handleChange}
             required
             className="w-full"
+            placeholder="Enter postal code"
           />
         </div>
 
@@ -140,6 +143,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
             onChange={handleChange}
             required
             className="w-full"
+            placeholder="Enter phone number"
           />
         </div>
       </div>

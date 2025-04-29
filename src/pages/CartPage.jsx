@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -16,7 +16,7 @@ const CartPage = () => {
   const [userAddress, setUserAddress] = useState(null);
   
   // Load saved address from localStorage
-  React.useEffect(() => {
+  useEffect(() => {
     if (currentUser) {
       const savedAddress = localStorage.getItem(`userAddress_${currentUser.id}`);
       if (savedAddress) {
@@ -59,6 +59,23 @@ const CartPage = () => {
     if (success) {
       toast.success('Coupon applied successfully!');
       setCouponCode('');
+      
+      // We need to calculate the discount based on the coupon
+      const validCoupons = {
+        'WELCOME10': { discount: 0.1, type: 'percentage' },
+        'FLAT100': { discount: 100, type: 'fixed' },
+        'SUMMER20': { discount: 0.2, type: 'percentage' }
+      };
+      
+      const coupon = validCoupons[couponCode.trim().toUpperCase()];
+      if (coupon) {
+        if (coupon.type === 'percentage') {
+          const discountAmount = subtotal * coupon.discount;
+          toast.info(`You saved ₹${discountAmount.toFixed(2)}!`);
+        } else {
+          toast.info(`You saved ₹${coupon.discount.toFixed(2)}!`);
+        }
+      }
     } else {
       toast.error('Invalid coupon code');
     }
@@ -68,6 +85,23 @@ const CartPage = () => {
     const success = applyCoupon(offerCode);
     if (success) {
       toast.success(`Offer code ${offerCode} applied successfully!`);
+      
+      // We need to calculate the discount based on the offer code
+      const validCoupons = {
+        'WELCOME10': { discount: 0.1, type: 'percentage' },
+        'FLAT100': { discount: 100, type: 'fixed' },
+        'SUMMER20': { discount: 0.2, type: 'percentage' }
+      };
+      
+      const coupon = validCoupons[offerCode];
+      if (coupon) {
+        if (coupon.type === 'percentage') {
+          const discountAmount = subtotal * coupon.discount;
+          toast.info(`You saved ₹${discountAmount.toFixed(2)}!`);
+        } else {
+          toast.info(`You saved ₹${coupon.discount.toFixed(2)}!`);
+        }
+      }
     } else {
       toast.error('Unable to apply offer');
     }

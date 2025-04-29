@@ -11,6 +11,7 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [totalPrice, setTotalPrice] = useState(0);
   const [appliedOffers, setAppliedOffers] = useState([]);
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
 
   // Load cart from localStorage on initial render
   useEffect(() => {
@@ -35,6 +36,17 @@ export const CartProvider = ({ children }) => {
         setAppliedOffers([]);
       }
     }
+    
+    // Load applied coupon
+    const savedCoupon = localStorage.getItem('appliedCoupon');
+    if (savedCoupon) {
+      try {
+        setAppliedCoupon(JSON.parse(savedCoupon));
+      } catch (error) {
+        console.error('Failed to parse coupon from localStorage:', error);
+        setAppliedCoupon(null);
+      }
+    }
   }, []);
 
   // Update localStorage whenever cart changes
@@ -45,13 +57,30 @@ export const CartProvider = ({ children }) => {
       localStorage.removeItem('cart');
     }
     
-    // Calculate total price
-    const total = cartItems.reduce((sum, item) => {
-      const offerPrice = item.offerPrice || item.price;
-      return sum + (offerPrice * item.quantity);
+    // Calculate subtotal
+    const subtotal = cartItems.reduce((sum, item) => {
+      const itemPrice = item.offerPrice || item.price;
+      return sum + (itemPrice * item.quantity);
     }, 0);
-    setTotalPrice(total);
-  }, [cartItems]);
+    
+    // Apply coupon discount if any
+    let finalPrice = subtotal;
+    if (appliedCoupon) {
+      if (appliedCoupon.type === 'percentage') {
+        finalPrice = subtotal * (1 - appliedCoupon.discount);
+      } else if (appliedCoupon.type === 'fixed') {
+        finalPrice = Math.max(0, subtotal - appliedCoupon.discount);
+      }
+    }
+    
+    // Add delivery and tax
+    const deliveryCharge = subtotal > 500 ? 0 : 50;
+    const tax = finalPrice * 0.05; // 5% tax
+    
+    // Set final total price
+    setTotalPrice(finalPrice + deliveryCharge + tax);
+    
+  }, [cartItems, appliedCoupon]);
   
   // Save applied offers to localStorage
   useEffect(() => {
@@ -61,6 +90,15 @@ export const CartProvider = ({ children }) => {
       localStorage.removeItem('appliedOffers');
     }
   }, [appliedOffers]);
+  
+  // Save applied coupon to localStorage
+  useEffect(() => {
+    if (appliedCoupon) {
+      localStorage.setItem('appliedCoupon', JSON.stringify(appliedCoupon));
+    } else {
+      localStorage.removeItem('appliedCoupon');
+    }
+  }, [appliedCoupon]);
 
   // Add item to cart
   const addToCart = (product) => {
@@ -139,7 +177,7 @@ export const CartProvider = ({ children }) => {
   // Apply coupon to entire cart
   const applyCoupon = (couponCode) => {
     // In a real application, this would validate the coupon with a backend API
-    // For demo purposes, we'll just apply a 10% discount for any coupon
+    // For demo purposes, we'll just apply discounts for specific coupon codes
     const validCoupons = {
       'WELCOME10': { discount: 0.1, type: 'percentage' },
       'FLAT100': { discount: 100, type: 'fixed' },
@@ -149,12 +187,24 @@ export const CartProvider = ({ children }) => {
     const coupon = validCoupons[couponCode];
     if (!coupon) return false;
     
+    // Check minimum order value for FLAT100
+    if (couponCode === 'FLAT100') {
+      const subtotal = cartItems.reduce((sum, item) => {
+        const itemPrice = item.offerPrice || item.price;
+        return sum + (itemPrice * item.quantity);
+      }, 0);
+      
+      if (subtotal < 1000) {
+        return false;
+      }
+    }
+    
     // Store the applied coupon
-    localStorage.setItem('appliedCoupon', JSON.stringify({
+    setAppliedCoupon({
       code: couponCode,
       ...coupon,
       appliedAt: new Date().toISOString()
-    }));
+    });
     
     return true;
   };
@@ -163,6 +213,7 @@ export const CartProvider = ({ children }) => {
   const clearCart = () => {
     setCartItems([]);
     setAppliedOffers([]);
+    setAppliedCoupon(null);
     localStorage.removeItem('cart');
     localStorage.removeItem('appliedOffers');
     localStorage.removeItem('appliedCoupon');
@@ -178,7 +229,8 @@ export const CartProvider = ({ children }) => {
     removeOffer,
     applyCoupon,
     clearCart,
-    appliedOffers
+    appliedOffers,
+    appliedCoupon
   };
 
   return (
