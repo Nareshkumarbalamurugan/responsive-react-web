@@ -34,7 +34,24 @@ const PaymentPage = () => {
   const handlePaymentComplete = () => {
     toast.success('Order placed successfully!');
     clearCart();
+    
+    // Scroll to top before navigating
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+    
     navigate('/');
+  };
+
+  // Handle navigation with scroll to top
+  const handleNavigate = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+    
+    navigate(returnTo);
   };
 
   return (
@@ -44,7 +61,7 @@ const PaymentPage = () => {
           <Button 
             variant="ghost" 
             className="p-2 mr-2"
-            onClick={() => navigate(returnTo)}
+            onClick={handleNavigate}
           >
             <ArrowLeft size={20} />
           </Button>
