@@ -39,3 +39,14 @@
 .tab-active {
   @apply border-b-2 border-[#3a5a9b] text-[#3a5a9b];
 }
+
+/* Voice assistant styles */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.pulse-animation {
+  animation: pulse 1.5s infinite;
+}
