@@ -59,7 +59,7 @@ const PaymentOptions = ({ total, onPaymentComplete }) => {
                 <div className="flex flex-col items-center">
                   <div className="border border-gray-200 p-2 rounded-md bg-white mb-3">
                     <img 
-                      src="https://images.unsplash.com/photo-1621155346337-1d19476ba7d6?w=400&auto=format&fit=crop" 
+                      src="/lovable-uploads/ec342845-03c9-417a-ad11-418f0296f4c9.png" 
                       alt="QR Code for Payment" 
                       className="h-48 w-48 object-cover"
                     />
