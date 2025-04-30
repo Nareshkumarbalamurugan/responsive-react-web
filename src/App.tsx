@@ -29,7 +29,6 @@ import OrdersPage from "./pages/OrdersPage";
 import SellerDashboardPage from "./pages/SellerDashboardPage";
 import ContactPage from "./pages/ContactPage";
 import PaymentPage from "./pages/PaymentPage";
-import VoiceBot from "./components/VoiceBot";
 
 const queryClient = new QueryClient();
 
@@ -70,7 +69,6 @@ const App = () => (
                 </Routes>
               </main>
               <Footer />
-              <VoiceBot />
             </div>
           </HashRouter>
         </CartProvider>
